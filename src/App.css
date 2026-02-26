@@ -1,0 +1,758 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap');
+ 
+:root {
+  --bg:      #f7f4ef;
+  --bg2:     #efebe3;
+  --surface: #ffffff;
+  --border:  #e0d8cc;
+  --accent:  #8b6f47;
+  --accent2: #c4956a;
+  --text:    #2c2416;
+  --muted:   #9c8c78;
+  --danger:  #c0392b;
+  --success: #27ae60;
+  --shadow:  0 2px 16px rgba(44,36,22,0.08);
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Noto Sans KR", sans-serif;
+  font-weight: 300;
+  min-height: 100vh;
+}
+ 
+/* ─────────────── Auth ─────────────── */
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  padding: 24px;
+}
+ 
+.auth-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: var(--shadow);
+}
+ 
+.auth-logo {
+  text-align: center;
+  margin-bottom: 36px;
+}
+ 
+.auth-logo h1 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 300;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+}
+ 
+.auth-logo p {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 6px;
+  letter-spacing: 0.08em;
+}
+ 
+.form-group { margin-bottom: 18px; }
+ 
+.form-group label {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 7px;
+}
+ 
+.form-group input,
+.form-group textarea,
+.form-group select {
+  width: 100%;
+  padding: 11px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 14px;
+  font-weight: 300;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.2s;
+}
+ 
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+  border-color: var(--accent);
+}
+ 
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
+}
+ 
+/* ─────────────── Buttons ─────────────── */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border: none;
+  border-radius: 8px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.05em;
+}
+ 
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent2); transform: translateY(-1px); }
+.btn-primary:disabled { background: var(--muted); cursor: not-allowed; transform: none; }
+ 
+.btn-secondary {
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  margin-top: 10px;
+}
+.btn-secondary:hover { background: var(--bg2); }
+ 
+.btn-sm { width: auto; padding: 7px 16px; font-size: 13px; }
+ 
+.auth-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 13px;
+  color: var(--muted);
+}
+.auth-footer a { color: var(--accent); text-decoration: none; font-weight: 500; }
+ 
+.error-msg {
+  background: rgba(192,57,43,0.07);
+  border: 1px solid rgba(192,57,43,0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  color: var(--danger);
+  margin-bottom: 16px;
+}
+ 
+/* ─────────────── Layout & Navbar ─────────────── */
+.layout { min-height: 100vh; display: flex; flex-direction: column; }
+ 
+.navbar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 16px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+ 
+.navbar-brand {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  text-decoration: none;
+}
+ 
+.navbar-links {
+  display: flex;
+  gap: 24px;
+}
+ 
+.navbar-links a {
+  font-size: 13px;
+  color: var(--muted);
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: color 0.2s;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+}
+ 
+.navbar-links a:hover,
+.navbar-links a.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+ 
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+ 
+.navbar-user { font-size: 13px; color: var(--muted); }
+ 
+.logout-btn {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 14px;
+  font-size: 13px;
+  color: var(--muted);
+  cursor: pointer;
+  font-family: "Noto Sans KR", sans-serif;
+  transition: all 0.2s;
+}
+.logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+ 
+.main-content {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 40px 24px;
+  width: 100%;
+}
+ 
+/* ─────────────── Page Header ─────────────── */
+.page-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+ 
+.page-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-weight: 300;
+  color: var(--text);
+}
+ 
+.page-subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+ 
+/* ─────────────── Card ─────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow);
+  transition: all 0.2s;
+}
+ 
+.card-pad { padding: 28px; }
+ 
+.card:hover {
+  border-color: var(--accent2);
+  box-shadow: 0 4px 24px rgba(44,36,22,0.12);
+  transform: translateY(-1px);
+}
+ 
+/* ─────────────── Dashboard Grid ─────────────── */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+ 
+@media (max-width: 640px) {
+  .dashboard-grid { grid-template-columns: 1fr; }
+}
+ 
+/* ─────────────── Stat Cards ─────────────── */
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  text-align: center;
+}
+ 
+.stat-number {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 52px;
+  font-weight: 300;
+  color: var(--accent);
+  line-height: 1;
+  margin: 8px 0;
+}
+ 
+.stat-label {
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+ 
+.stat-badge {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  font-size: 11px;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+}
+ 
+/* ─────────────── Upload Zone ─────────────── */
+.upload-zone {
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 32px 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--bg);
+}
+ 
+.upload-zone:hover,
+.upload-zone.has-image {
+  border-color: var(--accent);
+  border-style: solid;
+}
+ 
+.upload-zone img {
+  width: 100%;
+  max-height: 200px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+ 
+.upload-zone-icon { font-size: 32px; opacity: 0.35; margin-bottom: 8px; }
+.upload-zone-text { font-size: 13px; color: var(--muted); }
+ 
+/* ─────────────── Calendar ─────────────── */
+.calendar-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+}
+ 
+.calendar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+ 
+.calendar-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text);
+}
+ 
+.calendar-count {
+  display: inline-block;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  padding: 3px 12px;
+  font-size: 12px;
+  color: var(--accent);
+}
+ 
+.calendar-count.achieved {
+  background: rgba(139,111,71,0.12);
+  border-color: var(--accent);
+  font-weight: 500;
+}
+ 
+.calendar-days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+ 
+.calendar-day-label {
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  padding-bottom: 6px;
+}
+ 
+.calendar-day {
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 13px;
+  color: var(--muted);
+  background: var(--bg);
+  transition: all 0.15s;
+}
+ 
+.calendar-day.attended {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(139,111,71,0.35);
+}
+ 
+/* 진행률 바 */
+.progress-wrap { margin-top: 18px; }
+.progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+.progress-bar {
+  height: 4px;
+  background: var(--bg2);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--accent2));
+  border-radius: 2px;
+  transition: width 0.6s ease;
+}
+ 
+/* ─────────────── Ranking ─────────────── */
+.ranking-list { display: flex; flex-direction: column; gap: 10px; }
+ 
+.ranking-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.2s;
+}
+ 
+.ranking-item:hover { border-color: var(--accent2); transform: translateX(2px); }
+ 
+.ranking-item.rank-1 { background: rgba(139,111,71,0.06); border-color: var(--accent2); }
+.ranking-item.rank-2 { background: var(--bg); }
+.ranking-item.rank-3 { background: var(--bg2); }
+ 
+.ranking-left { display: flex; align-items: center; gap: 14px; }
+.ranking-medal { font-size: 22px; width: 32px; text-align: center; }
+.ranking-name  { font-size: 15px; color: var(--text); font-weight: 400; }
+ 
+.ranking-count {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 20px;
+  font-weight: 400;
+  color: var(--accent);
+}
+ 
+/* ─────────────── Badges ─────────────── */
+.badge-chip {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 12px;
+  transition: all 0.2s;
+}
+ 
+.badge-chip:hover { border-color: var(--accent2); }
+.badge-icon { font-size: 22px; }
+.badge-name { font-size: 12px; color: var(--text); font-weight: 500; white-space: nowrap; }
+.badge-month { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+/* 메달 뱃지 */
+.badge-medal {
+  position: relative;
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+}
+
+.badge-medal-img {
+  width: 52px;
+  height: 52px;
+  object-fit: contain;
+}
+
+.badge-medal-num {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  font-family: "Cormorant Garamond", serif;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+}
+ 
+/* ─────────────── Month Selector ─────────────── */
+.month-selector {
+  display: flex;
+  gap: 8px;
+}
+ 
+.month-selector select {
+  padding: 7px 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-family: "Noto Sans KR", sans-serif;
+  font-size: 13px;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.month-selector select:focus { border-color: var(--accent); }
+ 
+/* ─────────────── Profile Banner ─────────────── */
+.profile-banner {
+  background: linear-gradient(135deg, #2c2416 0%, #5a3e28 50%, #8b6f47 100%);
+  border-radius: 14px;
+  padding: 28px 32px;
+  color: #fff;
+  margin-bottom: 24px;
+}
+ 
+.profile-banner h2 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 26px;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+ 
+.profile-banner p { font-size: 13px; opacity: 0.65; margin-top: 4px; }
+ 
+/* ─────────────── Misc ─────────────── */
+.section-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  font-weight: 300;
+  color: var(--text);
+  margin-bottom: 14px;
+  letter-spacing: 0.03em;
+}
+ 
+.empty-state {
+  text-align: center;
+  padding: 60px 24px;
+  color: var(--muted);
+}
+.empty-state .icon { font-size: 36px; opacity: 0.25; margin-bottom: 12px; }
+.empty-state p { font-size: 14px; }
+ 
+.loading {
+  text-align: center;
+  padding: 60px;
+  color: var(--muted);
+  font-size: 14px;
+}
+ 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.fade-in { animation: fadeIn 0.3s ease; }
+ 
+/* ─────────────── Bottom Tab Navigation (모바일 전용) ─────────────── */
+.bottom-nav {
+  display: none;
+}
+
+/* ─────────────── Responsive ─────────────── */
+@media (max-width: 640px) {
+  /* 상단 navbar: 로고 + 로그아웃만 */
+  .navbar {
+    padding: 12px 16px;
+  }
+  .navbar-links {
+    display: none;
+  }
+  .navbar-user {
+    display: none;
+  }
+  .logout-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+
+  /* iOS input 자동 확대 방지: font-size 16px 미만이면 Safari가 줌인함 */
+  .form-group input,
+  .form-group textarea,
+  .form-group select {
+    font-size: 16px;
+  }
+
+  /* 본문 */
+  .main-content {
+    padding: 20px 14px;
+    /* 하단 탭바 높이만큼 여백 확보 */
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .page-title { font-size: 22px; }
+
+  /* 통계 카드 숫자 크기 축소 */
+  .stat-number { font-size: 38px; }
+  .stat-card   { padding: 16px 12px; border-radius: 10px; }
+
+  /* 카드 패딩 */
+  .card-pad { padding: 18px 16px; }
+
+  /* auth */
+  .auth-box { padding: 28px 18px; }
+
+  /* 랭킹 */
+  .ranking-item { padding: 12px 14px; }
+
+  /* 달력 */
+  .calendar-wrap { padding: 16px 12px; }
+  .calendar-day  { font-size: 11px; }
+
+  /* 프로필 배너 */
+  .profile-banner {
+    padding: 20px 18px;
+    border-radius: 10px;
+    margin-bottom: 16px;
+  }
+  .profile-banner h2 { font-size: 20px; }
+
+  /* 섹션 제목 */
+  .section-title { font-size: 16px; margin-bottom: 10px; }
+
+  /* 하단 탭바 표시 */
+  .bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 6px 0;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
+    z-index: 200;
+    box-shadow: 0 -2px 12px rgba(44,36,22,0.08);
+  }
+
+  .bottom-nav-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    text-decoration: none;
+    color: var(--muted);
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+
+  .bottom-nav-item.active {
+    color: var(--accent);
+  }
+
+  .bottom-nav-icon  { font-size: 20px; line-height: 1; }
+  .bottom-nav-label { font-size: 10px; letter-spacing: 0.03em; }
+}
+
+
+/* 1. 기본적으로 auth-page와 layout이 한 화면에 동시에 존재할 수 없게 만듭니다. */
+body:has(.layout) .auth-page {
+  display: none !important;
+}
+
+/* 2. 만약 브라우저가 :has를 지원하지 않을 경우를 대비한 구식 방법 */
+.layout + .auth-page,
+.auth-page + .layout {
+  display: none !important;
+}
+
+/* 3. 대시보드(Layout)가 화면 맨 위로 오도록 강제 */
+.layout {
+  position: relative;
+  z-index: 10;
+  background-color: var(--bg); /* 뒤가 비치지 않게 배경색 고정 */
+}
+
+/* ─────────────── Toggle Switch ─────────────── */
+.toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-slider {
+  position: absolute;
+  inset: 0;
+  background: var(--border);
+  border-radius: 24px;
+  transition: background 0.2s;
+}
+
+.toggle-slider::before {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.2s;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+
+.toggle-switch input:checked + .toggle-slider {
+  background: var(--accent);
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+  transform: translateX(20px);
+}
+
+/* ─────────────── Comments ─────────────── */
+.comment-item {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+}
