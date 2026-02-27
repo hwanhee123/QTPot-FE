@@ -1,5 +1,22 @@
 import { useState, useRef } from "react";
+import imageCompression from "browser-image-compression";
 import { uploadAttendance } from "../../api/attendanceApi";
+
+const convertToJpeg = async (file) => {
+  const isHeic = file.type === "image/heic" || file.type === "image/heif" ||
+    file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif");
+  if (isHeic) {
+    const heic2any = (await import("heic2any")).default;
+    const blob = await heic2any({ blob: file, toType: "image/jpeg", quality: 0.8 });
+    return new File([blob], file.name.replace(/\.(heic|heif)$/i, ".jpg"), { type: "image/jpeg" });
+  }
+  return file;
+};
+
+const compressImage = async (file) => {
+  const converted = await convertToJpeg(file);
+  return imageCompression(converted, { maxSizeMB: 3, maxWidthOrHeight: 1920, useWebWorker: true });
+};
 
 export default function UploadCard({ onSuccess, selectedDate }) {
   const [images,    setImages]    = useState([]);
@@ -12,18 +29,19 @@ export default function UploadCard({ onSuccess, selectedDate }) {
   const fileInputRef = useRef(null);
 
   // 파일 선택 시 (기존 목록에 추가)
-  const handleImageChange = (e) => {
+  const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     if (!files.length) return;
-    const valid = files.filter(f => {
-      if (f.size > 5 * 1024 * 1024) {
-        alert(`${f.name} 파일이 5MB를 초과합니다.`);
-        return false;
-      }
-      return true;
-    });
-    setImages(prev  => [...prev, ...valid]);
-    setPreviews(prev => [...prev, ...valid.map(f => URL.createObjectURL(f))]);
+    setLoading(true);
+    try {
+      const processed = await Promise.all(files.map(compressImage));
+      setImages(prev   => [...prev, ...processed]);
+      setPreviews(prev => [...prev, ...processed.map(f => URL.createObjectURL(f))]);
+    } catch {
+      setError("이미지 처리에 실패했습니다. 다른 사진을 선택해주세요.");
+    } finally {
+      setLoading(false);
+    }
     e.target.value = "";
   };
 
