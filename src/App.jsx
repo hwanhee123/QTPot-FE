@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
-import { onForegroundMessage, requestFcmToken, refreshFcmTokenOnStart } from "./firebase";
-import { updateFcmToken } from "./api/memberApi";
+import { onForegroundMessage, requestFcmToken } from "./firebase";
+import { updateFcmToken, clearFcmToken } from "./api/memberApi";
 import PrivateRoute   from "./components/common/PrivateRoute";
 import AdminRoute     from "./components/common/AdminRoute";
 import Login          from "./pages/Login";
@@ -41,17 +41,21 @@ export default function App() {
     return () => navigator.serviceWorker.removeEventListener("message", handler);
   }, []);
 
-  // 앱 시작 시 알림 구독 자동 갱신 (SW 업데이트 트리거 없이 active SW로만 갱신)
+  // 앱 시작 시 알림 자동 껐다 켜기 (Profile 토글과 동일한 흐름으로 APNS 재구독)
   useEffect(() => {
     const notiEnabled = localStorage.getItem("notiEnabled") === "true";
     if (!notiEnabled) return;
-    refreshFcmTokenOnStart()
-      .then(token => {
-        if (!token) return; // 실패 시 기존 토큰 유지
-        updateFcmToken(token);
+    (async () => {
+      try {
+        await clearFcmToken();                    // 1. 서버 토큰 제거 (끄기)
+        const token = await requestFcmToken(true); // 2. 새 APNS 구독 + 토큰 (켜기)
+        if (!token) return;
+        await updateFcmToken(token);              // 3. 서버 업데이트
         localStorage.setItem("fcmToken", token);
-      })
-      .catch(err => console.warn("FCM 자동 갱신 실패:", err));
+      } catch (err) {
+        console.warn("FCM 자동 갱신 실패:", err);
+      }
+    })();
   }, []);
 
   return (
