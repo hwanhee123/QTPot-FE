@@ -9,7 +9,7 @@ import { getMyAttendanceCount, getMyAttendance,
 import { changeMyPassword, updateFcmToken, clearFcmToken } from "../api/memberApi";
 import { requestFcmToken } from "../firebase";
 import { useAuth } from "../context/AuthContext";
-import { getYearMonth, getMonthLabel } from "../utils/dateUtils";
+import { getYearMonth, getMonthLabel, getDaysInMonth } from "../utils/dateUtils";
  
 export default function Profile() {
   const { user }        = useAuth();
@@ -126,14 +126,19 @@ export default function Profile() {
       <div style={{ display:"grid", gridTemplateColumns:"repeat(2,1fr)",
                     gap:16, marginBottom:32 }}>
  
-        <div className="stat-card">
-          <div className="stat-label">{getMonthLabel(year, month)}</div>
-          <div className="stat-number">{count}</div>
-          <div className="stat-label">일 인증</div>
-          {count >= 30 && <span className="stat-badge">🌸 꽃 달성!</span>}
-          {count >= 20 && count < 30 && <span className="stat-badge">🌱 새싹 달성!</span>}
-          {count >= 10 && count < 20 && <span className="stat-badge">🌰 씨앗 달성!</span>}
-        </div>
+        {(() => {
+          const flowerGoal = month === 2 ? getDaysInMonth(year, month) : 30;
+          return (
+            <div className="stat-card">
+              <div className="stat-label">{getMonthLabel(year, month)}</div>
+              <div className="stat-number">{count}</div>
+              <div className="stat-label">일 인증</div>
+              {count >= flowerGoal && <span className="stat-badge">🌸 꽃 달성!</span>}
+              {count >= 20 && count < flowerGoal && <span className="stat-badge">🌱 새싹 달성!</span>}
+              {count >= 10 && count < 20 && <span className="stat-badge">🌰 씨앗 달성!</span>}
+            </div>
+          );
+        })()}
  
         <div className="stat-card">
           <div className="stat-label">누적 뱃지</div>

@@ -3,9 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { signup as signupApi } from "../api/authApi";
  
 export default function Signup() {
-  const [form,    setForm]    = useState({ name:"", email:"", password:"" });
-  const [error,   setError]   = useState("");
-  const [success, setSuccess] = useState(false);
+  const [form,     setForm]    = useState({ name:"", email:"", password:"" });
+  const [confirm,  setConfirm] = useState("");
+  const [error,    setError]   = useState("");
+  const [success,  setSuccess] = useState(false);
   const navigate = useNavigate();
  
   const handleChange = (e) =>
@@ -13,6 +14,10 @@ export default function Signup() {
  
   const handleSubmit = async (e) => {
     e.preventDefault(); setError("");
+    if (form.password !== confirm) {
+      setError("비밀번호가 일치하지 않습니다.");
+      return;
+    }
     try {
       await signupApi(form);
       setSuccess(true);
@@ -61,7 +66,13 @@ export default function Signup() {
                 placeholder="8자 이상"
                 value={form.password} onChange={handleChange} />
             </div>
- 
+            <div className="form-group">
+              <label>비밀번호 확인</label>
+              <input type="password" required
+                placeholder="비밀번호를 한 번 더 입력하세요"
+                value={confirm} onChange={e => setConfirm(e.target.value)} />
+            </div>
+
             <button type="submit" className="btn btn-primary">
               가입하기
             </button>

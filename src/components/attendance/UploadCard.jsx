@@ -98,7 +98,7 @@ export default function UploadCard({ onSuccess, selectedDate }) {
               클릭하여 사진 선택 (여러 장 가능)
             </p>
             <p style={{ fontSize:11, color:"var(--muted)", opacity:0.6, marginTop:4 }}>
-              JPG, PNG / 최대 5MB
+              JPG, PNG, HEIC 지원
             </p>
             <input ref={fileInputRef} type="file" accept="image/*" multiple
               onChange={handleImageChange} style={{ display:"none" }} />

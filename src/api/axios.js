@@ -17,7 +17,10 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.clear();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      localStorage.removeItem("autoLogin");
+      sessionStorage.clear();
       window.location.href = "/login";
     }
     return Promise.reject(err);

@@ -1,18 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext";
 import { onForegroundMessage, requestFcmToken } from "./firebase";
 import { updateFcmToken, clearFcmToken } from "./api/memberApi";
 import PrivateRoute   from "./components/common/PrivateRoute";
 import AdminRoute     from "./components/common/AdminRoute";
-import Login          from "./pages/Login";
-import Signup         from "./pages/Signup";
-import ForgotPassword from "./pages/ForgotPassword";
-import Feed           from "./pages/Feed";
-import Dashboard      from "./pages/Dashboard";
-import Ranking        from "./pages/Ranking";
-import Profile        from "./pages/Profile";
-import Admin          from "./pages/Admin";
+
+const Login          = lazy(() => import("./pages/Login"));
+const Signup         = lazy(() => import("./pages/Signup"));
+const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
+const Feed           = lazy(() => import("./pages/Feed"));
+const Dashboard      = lazy(() => import("./pages/Dashboard"));
+const Ranking        = lazy(() => import("./pages/Ranking"));
+const Profile        = lazy(() => import("./pages/Profile"));
+const Admin          = lazy(() => import("./pages/Admin"));
  
 export default function App() {
   const [toast, setToast] = useState(null);

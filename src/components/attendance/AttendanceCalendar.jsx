@@ -23,7 +23,8 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
   const attendedDays = new Set(postsByDay.keys());
   const totalDays    = getDaysInMonth(year, month);
   const startDay     = getFirstDayOfWeek(year, month);
-  const progress     = Math.min((count / 20) * 100, 100);
+  const goal         = month === 2 ? totalDays : 30;
+  const progress     = Math.min((count / goal) * 100, 100);
 
   const isMaxMonth = maxYear && maxMonth
     ? (year > maxYear || (year === maxYear && month >= maxMonth))
@@ -51,8 +52,8 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
       <div className="calendar-header">
         <span className="calendar-title">{year}년 {month}월</span>
         <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          <span className={`calendar-count ${count >= 20 ? "achieved" : ""}`}>
-            {count}일 인증{count >= 20 && " 🏅"}
+          <span className={`calendar-count ${count >= goal ? "achieved" : ""}`}>
+            {count}일 인증{count >= goal && " 🏅"}
           </span>
           <button onClick={handlePrev}
             style={navBtnStyle}>‹</button>
@@ -88,8 +89,8 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
 
       <div className="progress-wrap">
         <div className="progress-label">
-          <span>20일 목표</span>
-          <span>{count} / 20일</span>
+          <span>{goal}일 목표</span>
+          <span>{count} / {goal}일</span>
         </div>
         <div className="progress-bar">
           <div className="progress-fill" style={{ width: `${progress}%` }} />

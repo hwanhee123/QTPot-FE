@@ -7,9 +7,7 @@ export function uploadAttendance(images, content, date, isPrivate = false) {
   form.append("content", content ?? "");
   if (date) form.append("date", date);
   form.append("isPrivate", isPrivate ? "true" : "false");
-  return api.post("/api/attendance", form, {
-    headers: { "Content-Type": "multipart/form-data" },
-  });
+  return api.post("/api/attendance", form);
 }
 
 // ── 소감 수정
@@ -22,11 +20,13 @@ export function deleteAttendance(id) {
   return api.delete(`/api/attendance/${id}`);
 }
 
-// ── 홈 피드 (date: "YYYY-MM-DD" | null)
-export function getFeed(date) {
-  return api.get("/api/attendance/feed", {
-    params: date ? { date } : {},
-  });
+// ── 홈 피드 (date: "YYYY-MM-DD" | null, year/month: 월 전체 조회)
+export function getFeed(date, year, month) {
+  const params = {};
+  if (date)  params.date  = date;
+  if (year)  params.year  = year;
+  if (month) params.month = month;
+  return api.get("/api/attendance/feed", { params });
 }
 
 // ── 내 월별 목록
