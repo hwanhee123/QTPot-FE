@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getComments, addComment, deleteComment } from "../../api/attendanceApi";
+import { getComments, addComment, deleteComment, toggleLike } from "../../api/attendanceApi";
 import { useAuth } from "../../context/AuthContext";
 
 export default function FeedCard({ item, onDelete, onEditContent, isMine, showOriginal = false }) {
@@ -8,6 +8,10 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
   const [editMode,    setEditMode]    = useState(false);
   const [editContent, setEditContent] = useState(item.content || "");
   const [saving,      setSaving]      = useState(false);
+
+  // 좋아요 상태
+  const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
+  const [isLiked,   setIsLiked]   = useState(item.isLiked ?? false);
 
   // 댓글 상태
   const [comments,     setComments]     = useState([]);
@@ -29,6 +33,12 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
       .catch(() => {})
       .finally(() => setCommentLoading(false));
   }, [showComments, item.id]);
+
+  const handleLike = async () => {
+    const res = await toggleLike(item.id);
+    setLikeCount(res.data.likeCount);
+    setIsLiked(res.data.isLiked);
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -161,15 +171,25 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
           </div>
         )}
 
-        {/* 댓글 토글 버튼 */}
-        <button
-          onClick={() => setShowComments(v => !v)}
-          style={{ marginTop:12, background:"none", border:"none",
-                   color:"var(--muted)", fontSize:12, cursor:"pointer",
-                   display:"flex", alignItems:"center", gap:4, padding:0 }}>
-          <span>💬</span>
-          <span>{showComments ? "댓글 닫기" : `댓글 ${item.commentCount != null ? `(${item.commentCount})` : "보기"}`}</span>
-        </button>
+        {/* 좋아요 + 댓글 토글 버튼 */}
+        <div style={{ display:"flex", alignItems:"center", gap:16, marginTop:12 }}>
+          <button
+            onClick={handleLike}
+            style={{ background:"none", border:"none", cursor:"pointer",
+                     display:"flex", alignItems:"center", gap:4,
+                     fontSize:13, color:"var(--text)", padding:0 }}>
+            <span>{isLiked ? "❤️" : "🤍"}</span>
+            <span>{likeCount}</span>
+          </button>
+          <button
+            onClick={() => setShowComments(v => !v)}
+            style={{ background:"none", border:"none",
+                     color:"var(--muted)", fontSize:12, cursor:"pointer",
+                     display:"flex", alignItems:"center", gap:4, padding:0 }}>
+            <span>💬</span>
+            <span>{showComments ? "댓글 닫기" : `댓글 ${item.commentCount != null ? `(${item.commentCount})` : "보기"}`}</span>
+          </button>
+        </div>
 
         {/* 댓글 영역 */}
         {showComments && (

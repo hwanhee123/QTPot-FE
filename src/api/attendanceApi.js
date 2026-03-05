@@ -62,3 +62,8 @@ export function addComment(attendanceId, content) {
 export function deleteComment(attendanceId, commentId) {
   return api.delete(`/api/attendance/${attendanceId}/comments/${commentId}`);
 }
+
+// ── 좋아요 토글
+export function toggleLike(attendanceId) {
+  return api.post(`/api/attendance/${attendanceId}/like`);
+}
