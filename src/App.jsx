@@ -21,10 +21,12 @@ function AutoFcmToken() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (!user) return; // 로그인 안 된 경우 무시
+    if (!user) return;
     (async () => {
       try {
-        const token = await requestFcmToken(true);
+        // forceRefresh=false: 기존 토큰 유지 (삭제 후 재발급 안 함)
+        // 기존 토큰이 있으면 그대로 반환, 없으면 새로 발급
+        const token = await requestFcmToken(false);
         if (!token) return;
         await updateFcmToken(token);
         localStorage.setItem("fcmToken", token);
@@ -33,15 +35,14 @@ function AutoFcmToken() {
         console.warn("FCM 자동 발급 실패:", err);
       }
     })();
-  }, [user]); // 로그인 상태 바뀔 때마다 실행
+  }, [user]);
 
-  return null; // UI 없음
+  return null;
 }
 
 export default function App() {
   const [toast, setToast] = useState(null);
 
-  // 포그라운드 알림 (Android/Chrome)
   useEffect(() => {
     const unsubscribe = onForegroundMessage((payload) => {
       const { title, body } = payload.notification;
@@ -51,7 +52,6 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // 포그라운드 알림 (iOS PWA - 서비스워커 postMessage)
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     const handler = (event) => {
@@ -67,7 +67,6 @@ export default function App() {
 
   return (
     <AuthProvider>
-      {/* 로그인된 모든 유저에게 자동 FCM 토큰 발급 */}
       <AutoFcmToken />
 
       {toast && (
