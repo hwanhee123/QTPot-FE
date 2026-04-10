@@ -1,24 +1,47 @@
-import { useEffect, useState, lazy, Suspense } from "react";
+import { useEffect, useState, lazy } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider } from "./context/AuthContext";
+import { AuthProvider, useAuth } from "./context/AuthContext";
 import { onForegroundMessage, requestFcmToken } from "./firebase";
-import { updateFcmToken, clearFcmToken } from "./api/memberApi";
+import { updateFcmToken } from "./api/memberApi";
 import PrivateRoute   from "./components/common/PrivateRoute";
 import AdminRoute     from "./components/common/AdminRoute";
 
-const Login               = lazy(() => import("./pages/Login"));
-const Signup              = lazy(() => import("./pages/Signup"));
-const ForgotPassword      = lazy(() => import("./pages/ForgotPassword"));
-const Feed                = lazy(() => import("./pages/Feed"));
-const Dashboard           = lazy(() => import("./pages/Dashboard"));
-const Ranking             = lazy(() => import("./pages/Ranking"));
-const Profile             = lazy(() => import("./pages/Profile"));
-const Admin               = lazy(() => import("./pages/Admin"));
+const Login                = lazy(() => import("./pages/Login"));
+const Signup               = lazy(() => import("./pages/Signup"));
+const ForgotPassword       = lazy(() => import("./pages/ForgotPassword"));
+const Feed                 = lazy(() => import("./pages/Feed"));
+const Dashboard            = lazy(() => import("./pages/Dashboard"));
+const Ranking              = lazy(() => import("./pages/Ranking"));
+const Profile              = lazy(() => import("./pages/Profile"));
+const Admin                = lazy(() => import("./pages/Admin"));
 const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
- 
+
+/* ─── 로그인된 유저에게 자동으로 FCM 토큰 발급/갱신 ─── */
+function AutoFcmToken() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (!user) return; // 로그인 안 된 경우 무시
+    (async () => {
+      try {
+        const token = await requestFcmToken(true);
+        if (!token) return;
+        await updateFcmToken(token);
+        localStorage.setItem("fcmToken", token);
+        localStorage.setItem("notiEnabled", "true");
+      } catch (err) {
+        console.warn("FCM 자동 발급 실패:", err);
+      }
+    })();
+  }, [user]); // 로그인 상태 바뀔 때마다 실행
+
+  return null; // UI 없음
+}
+
 export default function App() {
   const [toast, setToast] = useState(null);
 
+  // 포그라운드 알림 (Android/Chrome)
   useEffect(() => {
     const unsubscribe = onForegroundMessage((payload) => {
       const { title, body } = payload.notification;
@@ -28,6 +51,7 @@ export default function App() {
     return unsubscribe;
   }, []);
 
+  // 포그라운드 알림 (iOS PWA - 서비스워커 postMessage)
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     const handler = (event) => {
@@ -41,24 +65,11 @@ export default function App() {
     return () => navigator.serviceWorker.removeEventListener("message", handler);
   }, []);
 
-  useEffect(() => {
-    const notiEnabled = localStorage.getItem("notiEnabled") === "true";
-    if (!notiEnabled) return;
-    (async () => {
-      try {
-        await clearFcmToken();
-        const token = await requestFcmToken(true);
-        if (!token) return;
-        await updateFcmToken(token);
-        localStorage.setItem("fcmToken", token);
-      } catch (err) {
-        console.warn("FCM 자동 갱신 실패:", err);
-      }
-    })();
-  }, []);
-
   return (
     <AuthProvider>
+      {/* 로그인된 모든 유저에게 자동 FCM 토큰 발급 */}
+      <AutoFcmToken />
+
       {toast && (
         <div style={{
           position:"fixed", top:16, right:16, zIndex:9999,
@@ -70,14 +81,13 @@ export default function App() {
           <div style={{ fontSize:13, color:"#666" }}>{toast.body}</div>
         </div>
       )}
+
       <BrowserRouter>
         <Routes>
-          {/* 공개 라우트 */}
           <Route path="/login"           element={<Login />} />
           <Route path="/signup"          element={<Signup />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
- 
-          {/* 로그인 필요 */}
+
           <Route path="/feed"
             element={<PrivateRoute><Feed /></PrivateRoute>} />
           <Route path="/dashboard"
@@ -89,10 +99,9 @@ export default function App() {
           <Route path="/notification-settings"
             element={<PrivateRoute><NotificationSettings /></PrivateRoute>} />
 
-          {/* ADMIN 전용 */}
           <Route path="/admin"
             element={<AdminRoute><Admin /></AdminRoute>} />
- 
+
           <Route path="/" element={<PrivateRoute><Navigate to="/feed" replace /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
