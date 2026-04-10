@@ -6,19 +6,19 @@ import { updateFcmToken, clearFcmToken } from "./api/memberApi";
 import PrivateRoute   from "./components/common/PrivateRoute";
 import AdminRoute     from "./components/common/AdminRoute";
 
-const Login          = lazy(() => import("./pages/Login"));
-const Signup         = lazy(() => import("./pages/Signup"));
-const ForgotPassword = lazy(() => import("./pages/ForgotPassword"));
-const Feed           = lazy(() => import("./pages/Feed"));
-const Dashboard      = lazy(() => import("./pages/Dashboard"));
-const Ranking        = lazy(() => import("./pages/Ranking"));
-const Profile        = lazy(() => import("./pages/Profile"));
-const Admin          = lazy(() => import("./pages/Admin"));
+const Login               = lazy(() => import("./pages/Login"));
+const Signup              = lazy(() => import("./pages/Signup"));
+const ForgotPassword      = lazy(() => import("./pages/ForgotPassword"));
+const Feed                = lazy(() => import("./pages/Feed"));
+const Dashboard           = lazy(() => import("./pages/Dashboard"));
+const Ranking             = lazy(() => import("./pages/Ranking"));
+const Profile             = lazy(() => import("./pages/Profile"));
+const Admin               = lazy(() => import("./pages/Admin"));
+const NotificationSettings = lazy(() => import("./pages/NotificationSettings"));
  
 export default function App() {
   const [toast, setToast] = useState(null);
 
-  // 포그라운드 알림: Android/Chrome은 onMessage로 들어옴
   useEffect(() => {
     const unsubscribe = onForegroundMessage((payload) => {
       const { title, body } = payload.notification;
@@ -28,7 +28,6 @@ export default function App() {
     return unsubscribe;
   }, []);
 
-  // iOS 포그라운드 알림: 서비스워커 postMessage 수신 (iOS는 onMessage 대신 onBackgroundMessage로 라우팅)
   useEffect(() => {
     if (!("serviceWorker" in navigator)) return;
     const handler = (event) => {
@@ -42,16 +41,15 @@ export default function App() {
     return () => navigator.serviceWorker.removeEventListener("message", handler);
   }, []);
 
-  // 앱 시작 시 알림 자동 껐다 켜기 (Profile 토글과 동일한 흐름으로 APNS 재구독)
   useEffect(() => {
     const notiEnabled = localStorage.getItem("notiEnabled") === "true";
     if (!notiEnabled) return;
     (async () => {
       try {
-        await clearFcmToken();                    // 1. 서버 토큰 제거 (끄기)
-        const token = await requestFcmToken(true); // 2. 새 APNS 구독 + 토큰 (켜기)
+        await clearFcmToken();
+        const token = await requestFcmToken(true);
         if (!token) return;
-        await updateFcmToken(token);              // 3. 서버 업데이트
+        await updateFcmToken(token);
         localStorage.setItem("fcmToken", token);
       } catch (err) {
         console.warn("FCM 자동 갱신 실패:", err);
@@ -88,15 +86,14 @@ export default function App() {
             element={<PrivateRoute><Ranking /></PrivateRoute>} />
           <Route path="/profile"
             element={<PrivateRoute><Profile /></PrivateRoute>} />
- 
+          <Route path="/notification-settings"
+            element={<PrivateRoute><NotificationSettings /></PrivateRoute>} />
+
           {/* ADMIN 전용 */}
           <Route path="/admin"
             element={<AdminRoute><Admin /></AdminRoute>} />
  
-          {/* 루트 경로: 로그인 상태면 /feed, 아니면 /login */}
           <Route path="/" element={<PrivateRoute><Navigate to="/feed" replace /></PrivateRoute>} />
-
-          {/* 기본 리다이렉트 */}
           <Route path="*" element={<Navigate to="/login" replace />} />
         </Routes>
       </BrowserRouter>

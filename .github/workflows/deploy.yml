@@ -1,0 +1,47 @@
+name: Frontend CI/CD
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: Node.js 22 설정
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 의존성 설치
+        run: npm ci
+
+      - name: 빌드
+        run: npm run build
+
+      - name: EC2 SSH 키 설정
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.EC2_KEY }}" > ~/.ssh/deploy_key.pem
+          chmod 600 ~/.ssh/deploy_key.pem
+          ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
+
+      - name: dist 파일 EC2로 전송
+        run: |
+          scp -i ~/.ssh/deploy_key.pem -r dist \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }}:/home/ec2-user/frontend-dist
+
+      - name: nginx에 배포
+        run: |
+          ssh -i ~/.ssh/deploy_key.pem \
+            ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} \
+            "sudo rm -rf /usr/share/nginx/html/* && \
+             sudo cp -r /home/ec2-user/frontend-dist/* /usr/share/nginx/html/ && \
+             sudo chmod -R 755 /usr/share/nginx/html && \
+             rm -rf /home/ec2-user/frontend-dist && \
+             echo '✅ 프론트엔드 배포 완료'"

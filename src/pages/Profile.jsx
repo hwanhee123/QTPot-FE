@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/common/Layout";
 import BadgeCard from "../components/badge/BadgeCard";
 import FeedCard from "../components/attendance/FeedCard";
@@ -6,14 +7,14 @@ import { getMyBadges } from "../api/badgeApi";
 import { getMyAttendanceCount, getMyAttendance,
          deleteAttendance, updateAttendanceContent,
          getMyTotalCount } from "../api/attendanceApi";
-import { changeMyPassword, updateFcmToken, clearFcmToken } from "../api/memberApi";
-import { requestFcmToken } from "../firebase";
+import { changeMyPassword } from "../api/memberApi";
 import { useAuth } from "../context/AuthContext";
 import { getYearMonth, getMonthLabel, getDaysInMonth } from "../utils/dateUtils";
  
 export default function Profile() {
   const { user }        = useAuth();
   const { year, month } = getYearMonth();
+  const navigate        = useNavigate();
  
   const [badges,     setBadges]     = useState([]);
   const [count,      setCount]      = useState(0);
@@ -26,39 +27,6 @@ export default function Profile() {
   const [pwError,   setPwError]   = useState("");
   const [pwOk,      setPwOk]      = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
-
-  const [notiEnabled, setNotiEnabled] = useState(
-    () => localStorage.getItem("notiEnabled") === "true"
-  );
-  const [notiLoading, setNotiLoading] = useState(false);
-  const [notiError, setNotiError] = useState("");
-
-  const handleToggleNotification = async () => {
-    setNotiLoading(true);
-    setNotiError("");
-    try {
-      if (notiEnabled) {
-        await clearFcmToken();
-        localStorage.setItem("notiEnabled", "false");
-        localStorage.removeItem("fcmToken");
-        setNotiEnabled(false);
-      } else {
-        const token = await requestFcmToken(true);
-        if (token) {
-          await updateFcmToken(token);
-          localStorage.setItem("notiEnabled", "true");
-          localStorage.setItem("fcmToken", token);
-          setNotiEnabled(true);
-        } else {
-          setNotiError("알림 권한이 거부되었습니다. 기기 설정에서 알림을 허용해주세요.");
-        }
-      }
-    } catch (e) {
-      setNotiError(e.message || "알림 설정에 실패했습니다.");
-    } finally {
-      setNotiLoading(false);
-    }
-  };
  
   useEffect(() => {
     Promise.all([
@@ -66,7 +34,6 @@ export default function Profile() {
       getMyAttendanceCount(year, month),
       getMyAttendance(year, month),
       getMyTotalCount(),
-      // 올해 인증 수: year 파라미터만 넘기고 month=0
       getMyAttendanceCount(year, 0),
     ]).then(([b, c, posts, total, yearC]) => {
       setBadges(b.data);
@@ -172,22 +139,25 @@ export default function Profile() {
         </div>
       )}
  
+      {/* 알림 설정 — 클릭하면 설정 페이지로 이동 */}
       <p className="section-title">알림 설정</p>
-      <div className="card card-pad" style={{ maxWidth:440, marginBottom:32,
-            display:"flex", alignItems:"center", justifyContent:"space-between" }}>
-        <span style={{ fontSize:13, color:"var(--text-secondary)" }}>
-          {notiEnabled ? "🔔 댓글 알림 켜짐" : "🔕 댓글 알림 꺼짐"}
-        </span>
-        <button
-          className={`btn ${notiEnabled ? "btn-secondary" : "btn-primary"}`}
-          style={{ padding:"6px 14px", fontSize:13 }}
-          onClick={handleToggleNotification}
-          disabled={notiLoading}>
-          {notiLoading ? "처리 중..." : notiEnabled ? "알림 끄기" : "알림 켜기"}
-        </button>
-        {notiError && (
-          <p style={{ fontSize:12, color:"var(--error)", marginTop:8, width:"100%" }}>{notiError}</p>
-        )}
+      <div
+        className="card card-pad"
+        onClick={() => navigate("/notification-settings")}
+        style={{
+          maxWidth: 440,
+          marginBottom: 32,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          cursor: "pointer",
+          transition: "background 0.15s",
+        }}
+        onMouseEnter={e => e.currentTarget.style.background = "var(--bg2)"}
+        onMouseLeave={e => e.currentTarget.style.background = ""}
+      >
+        <span style={{ fontSize:14 }}>🔔 알림 설정하기</span>
+        <span style={{ color:"var(--muted)", fontSize:18 }}>›</span>
       </div>
 
       <p className="section-title">비밀번호 변경</p>
