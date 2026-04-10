@@ -2,7 +2,7 @@ name: Frontend CI/CD
 
 on:
   push:
-    branches: [ main ]
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -44,4 +44,4 @@ jobs:
              sudo cp -r /home/ec2-user/frontend-dist/* /usr/share/nginx/html/ && \
              sudo chmod -R 755 /usr/share/nginx/html && \
              rm -rf /home/ec2-user/frontend-dist && \
-             echo '✅ 프론트엔드 배포 완료'"
+             echo 'Frontend deployed'"
