@@ -7,25 +7,18 @@ import { updateFcmToken } from "../api/memberApi";
 
 const ITEM_HEIGHT   = 48;
 const VISIBLE_COUNT = 5;
-const PAD           = Math.floor(VISIBLE_COUNT / 2); // 위아래 여백 항목 수
+const PAD           = Math.floor(VISIBLE_COUNT / 2);
 const HOURS         = Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0"));
 const MINUTES       = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
 
-/* ─── 드럼롤 컬럼
- *  - CSS scroll-snap-align: center 으로 스냅
- *  - 초기값(defaultValue)으로만 스크롤 위치 세팅, 이후 스크롤은 브라우저가 처리
- *  - onChange는 스크롤 멈춘 후 현재 위치를 읽어서 한 번만 호출
- * ─── */
 function DrumColumn({ items, defaultValue, onChange }) {
   const listRef  = useRef(null);
   const timer    = useRef(null);
-  const snapping = useRef(false); // 프로그래매틱 스냅 중 onScroll 무시
+  const snapping = useRef(false);
 
-  // 마운트 시 초기 위치만 세팅 (이후 re-render에 반응 안 함)
   useEffect(() => {
     const idx = items.indexOf(defaultValue);
     if (listRef.current) {
-      // instant 스크롤: 스냅 이벤트 없이 바로 이동
       listRef.current.scrollTop = idx * ITEM_HEIGHT;
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
@@ -35,17 +28,12 @@ function DrumColumn({ items, defaultValue, onChange }) {
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
       if (!listRef.current) return;
-      // 현재 스크롤 위치에서 가장 가까운 항목 계산
       const raw = listRef.current.scrollTop / ITEM_HEIGHT;
       const idx = Math.max(0, Math.min(Math.round(raw), items.length - 1));
       const targetTop = idx * ITEM_HEIGHT;
-
-      // 정확한 위치로 스냅 (smooth)
       snapping.current = true;
       listRef.current.scrollTo({ top: targetTop, behavior: "smooth" });
       onChange(items[idx]);
-
-      // smooth 완료 후 플래그 해제 (보통 300ms 이내)
       setTimeout(() => { snapping.current = false; }, 400);
     }, 80);
   };
@@ -54,8 +42,6 @@ function DrumColumn({ items, defaultValue, onChange }) {
 
   return (
     <div style={{ position: "relative", width: 72, height: containerH, overflow: "hidden" }}>
-
-      {/* 선택 영역 하이라이트 */}
       <div style={{
         position: "absolute",
         top: PAD * ITEM_HEIGHT, left: 0, right: 0,
@@ -66,23 +52,18 @@ function DrumColumn({ items, defaultValue, onChange }) {
         borderRadius: 6,
         pointerEvents: "none", zIndex: 2,
       }} />
-
-      {/* 위 페이드 */}
       <div style={{
         position: "absolute", top: 0, left: 0, right: 0,
         height: PAD * ITEM_HEIGHT,
         background: "linear-gradient(to bottom, var(--surface) 20%, transparent)",
         pointerEvents: "none", zIndex: 3,
       }} />
-      {/* 아래 페이드 */}
       <div style={{
         position: "absolute", bottom: 0, left: 0, right: 0,
         height: PAD * ITEM_HEIGHT,
         background: "linear-gradient(to top, var(--surface) 20%, transparent)",
         pointerEvents: "none", zIndex: 3,
       }} />
-
-      {/* 스크롤 영역 */}
       <div
         ref={listRef}
         onScroll={handleScroll}
@@ -93,8 +74,7 @@ function DrumColumn({ items, defaultValue, onChange }) {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           WebkitOverflowScrolling: "touch",
-          // 위아래 padding으로 첫/마지막 항목이 가운데 오게
-          paddingTop:    PAD * ITEM_HEIGHT,
+          paddingTop: PAD * ITEM_HEIGHT,
           paddingBottom: PAD * ITEM_HEIGHT,
           boxSizing: "content-box",
         }}
@@ -122,7 +102,6 @@ function DrumColumn({ items, defaultValue, onChange }) {
   );
 }
 
-/* ─── 토글 스위치 ─── */
 function Toggle({ value, onChange }) {
   return (
     <div
@@ -146,20 +125,17 @@ function Toggle({ value, onChange }) {
   );
 }
 
-/* ─── 메인 페이지 ─── */
 export default function NotificationSettings() {
   const navigate = useNavigate();
 
-  const [commentNoti,  setCommentNoti]  = useState(true);
-  const [qtNotiOn,     setQtNotiOn]     = useState(false);
-  const [hour,         setHour]         = useState("07");
-  const [minute,       setMinute]       = useState("00");
-  const [loading,      setLoading]      = useState(true);
-  const [saving,       setSaving]       = useState(false);
-  const [saved,        setSaved]        = useState(false);
-  const [error,        setError]        = useState("");
+  const [commentNoti, setCommentNoti] = useState(true);
+  const [qtNotiOn,    setQtNotiOn]    = useState(false);
+  const [hour,        setHour]        = useState("07");
+  const [minute,      setMinute]      = useState("00");
+  const [loading,     setLoading]     = useState(true);
+  const [saving,      setSaving]      = useState(false);
+  const [error,       setError]       = useState("");
 
-  // 초기 설정 로드
   useEffect(() => {
     getNotificationSettings()
       .then((res) => {
@@ -176,28 +152,21 @@ export default function NotificationSettings() {
       .finally(() => setLoading(false));
   }, []);
 
-  const ensureFcmToken = async () => {
-    if (localStorage.getItem("notiEnabled") === "true") return;
+  const handleSave = async () => {
+    setSaving(true); setError("");
     try {
+      // 무조건 FCM 토큰 발급/갱신 (localStorage 조건 없이)
       const token = await requestFcmToken(true);
       if (token) {
         await updateFcmToken(token);
         localStorage.setItem("notiEnabled", "true");
         localStorage.setItem("fcmToken", token);
       }
-    } catch {}
-  };
-
-  const handleSave = async () => {
-    setSaving(true); setSaved(false); setError("");
-    try {
-      if (commentNoti || qtNotiOn) await ensureFcmToken();
       await updateNotificationSettings(commentNoti, qtNotiOn ? `${hour}:${minute}` : null);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      // 저장 완료 후 프로필로 이동
+      navigate("/profile");
     } catch {
       setError("저장에 실패했습니다. 다시 시도해주세요.");
-    } finally {
       setSaving(false);
     }
   };
@@ -206,7 +175,6 @@ export default function NotificationSettings() {
 
   return (
     <Layout>
-      {/* 헤더 */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
         <button
           onClick={() => navigate("/profile")}
@@ -215,7 +183,6 @@ export default function NotificationSettings() {
         <h2 style={{ fontSize: 18, fontWeight: 500 }}>알림 설정</h2>
       </div>
 
-      {/* 댓글 알림 */}
       <div className="card card-pad" style={{ marginBottom: 16 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <div>
@@ -226,7 +193,6 @@ export default function NotificationSettings() {
         </div>
       </div>
 
-      {/* 큐티 알림 */}
       <div className="card card-pad" style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: qtNotiOn ? 20 : 0 }}>
           <div>
@@ -250,7 +216,6 @@ export default function NotificationSettings() {
       </div>
 
       {error && <p style={{ fontSize: 13, color: "var(--danger)", marginBottom: 10, textAlign: "center" }}>{error}</p>}
-      {saved && <p style={{ fontSize: 13, color: "var(--success)", marginBottom: 10, textAlign: "center" }}>✓ 저장되었습니다</p>}
       <button className="btn btn-primary" onClick={handleSave} disabled={saving}>
         {saving ? "저장 중..." : "저장"}
       </button>
