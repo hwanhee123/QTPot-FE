@@ -7,9 +7,8 @@ import PrivateRoute   from "./components/common/PrivateRoute";
 import AdminRoute     from "./components/common/AdminRoute";
 
 const Login                = lazy(() => import("./pages/Login"));
-const Signup               = lazy(() => import("./pages/Signup"));
-const ForgotPassword       = lazy(() => import("./pages/ForgotPassword"));
-const Feed                 = lazy(() => import("./pages/Feed"));
+const Signup                = lazy(() => import("./pages/Signup"));
+const Feed                  = lazy(() => import("./pages/Feed"));
 const Dashboard            = lazy(() => import("./pages/Dashboard"));
 const Ranking              = lazy(() => import("./pages/Ranking"));
 const Profile              = lazy(() => import("./pages/Profile"));
@@ -85,7 +84,6 @@ export default function App() {
         <Routes>
           <Route path="/login"           element={<Login />} />
           <Route path="/signup"          element={<Signup />} />
-          <Route path="/forgot-password" element={<ForgotPassword />} />
 
           <Route path="/feed"
             element={<PrivateRoute><Feed /></PrivateRoute>} />

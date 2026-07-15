@@ -5,6 +5,7 @@ export default function AdminRoute({ children }) {
   const { user, loading } = useAuth();
   if (loading) return null;
   if (!user)              return <Navigate to="/login"    replace />;
+  if (user.mustChangePassword) return <Navigate to="/profile" replace />;
   if (user.role !== "ADMIN") return <Navigate to="/dashboard" replace />;
   return children;
 }

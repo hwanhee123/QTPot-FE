@@ -17,8 +17,12 @@ export default function Login() {
     e.preventDefault(); setError("");
     try {
       const { data } = await loginApi(form);
-      login(data.token, { name: data.name, role: data.role, email: data.email }, rememberMe);
-      navigate(data.role === "ADMIN" ? "/admin" : "/feed");
+      login(data.token, {
+        name: data.name, role: data.role, email: data.email,
+        mustChangePassword: data.mustChangePassword,
+      }, rememberMe);
+      if (data.mustChangePassword) navigate("/profile");
+      else navigate(data.role === "ADMIN" ? "/admin" : "/feed");
     } catch (err) {
       setError(err.response?.data?.message || "로그인에 실패했습니다.");
     }
@@ -53,10 +57,9 @@ export default function Login() {
           <button type="submit" className="btn btn-primary">로그인</button>
         </form>
         <div className="auth-footer">
-          <Link to="/forgot-password"
-            style={{ display: "block", marginBottom: 8 }}>
-            비밀번호를 잊으셨나요?
-          </Link>
+          <p style={{ marginBottom: 8, fontSize: 13, color: "var(--text-secondary)" }}>
+            비밀번호를 잊으셨다면 관리자에게 문의해주세요.
+          </p>
           계정이 없으신가요? <Link to="/signup">회원가입</Link>
         </div>
       </div>

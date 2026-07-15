@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from "react";
+import { logout as logoutApi } from "../api/authApi";
 
 const AuthContext = createContext(null);
 
@@ -46,7 +47,9 @@ export function AuthProvider({ children }) {
     setUser(userData);
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // 서버에 토큰 폐기 요청 (localStorage에서 토큰 지우기 전에 먼저 보내야 헤더가 실림)
+    try { await logoutApi(); } catch { /* 실패해도 클라이언트 로그아웃은 진행 */ }
     localStorage.removeItem("token");
     localStorage.removeItem("user");
     localStorage.removeItem("autoLogin");
@@ -54,8 +57,17 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  // 로그인 상태를 유지한 채 유저 정보 일부만 갱신 (예: 비밀번호 변경 후 mustChangePassword 해제)
+  const updateUser = (patch) => {
+    setUser(prev => {
+      const next = { ...prev, ...patch };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, updateUser, loading }}>
       {/* [핵심] loading이 true일 때는 하위 컴포넌트(App, Dashboard 등)를
         아예 그리지 않고 기다립니다. 이렇게 해야 겹침 현상이 사라집니다.
       */}

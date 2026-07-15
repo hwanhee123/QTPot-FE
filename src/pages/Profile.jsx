@@ -12,7 +12,7 @@ import { useAuth } from "../context/AuthContext";
 import { getYearMonth, getMonthLabel, getDaysInMonth } from "../utils/dateUtils";
  
 export default function Profile() {
-  const { user }        = useAuth();
+  const { user, updateUser } = useAuth();
   const { year, month } = getYearMonth();
   const navigate        = useNavigate();
  
@@ -68,6 +68,7 @@ export default function Profile() {
       await changeMyPassword(pwForm.currentPassword, pwForm.newPassword);
       setPwOk(true);
       setPwForm({ currentPassword:"", newPassword:"", confirm:"" });
+      if (user?.mustChangePassword) updateUser({ mustChangePassword: false });
     } catch (err) {
       setPwError(err.response?.data?.message || "변경에 실패했습니다.");
     } finally { setPwLoading(false); }
@@ -162,6 +163,14 @@ export default function Profile() {
 
       <p className="section-title">비밀번호 변경</p>
       <div className="card card-pad" style={{ maxWidth:440 }}>
+        {user?.mustChangePassword && (
+          <div style={{ background:"rgba(230,126,34,0.1)",
+                        border:"1px solid rgba(230,126,34,0.35)",
+                        borderRadius:6, padding:"10px 12px",
+                        fontSize:13, color:"#e67e22", marginBottom:16 }}>
+            관리자가 초기화한 임시 비밀번호를 사용 중입니다. 계속 이용하려면 비밀번호를 변경해주세요.
+          </div>
+        )}
         <form onSubmit={handlePwChange}>
           {pwError && <div className="error-msg">{pwError}</div>}
           {pwOk && (
