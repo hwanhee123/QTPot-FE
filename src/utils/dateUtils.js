@@ -5,6 +5,11 @@ export function getYearMonth(date = new Date()) {
     month: date.getMonth() + 1,
   };
 }
+
+// 오늘 날짜 "YYYY-MM-DD" 문자열
+export function getTodayString(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
  
 // 한국어 월 레이블  예) "2025년 3월"
 export function getMonthLabel(year, month) {

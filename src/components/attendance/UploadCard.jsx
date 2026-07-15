@@ -67,8 +67,8 @@ export default function UploadCard({ onSuccess, selectedDate }) {
   if (done) return (
     <div className="card card-pad fade-in" style={{ textAlign:"center", padding:"40px 20px" }}>
       <div style={{ fontSize:48, marginBottom:16 }}>🙏</div>
-      <p style={{ fontFamily:"Cormorant Garamond,serif", fontSize:22,
-                  fontWeight:400, color:"var(--accent)", marginBottom:8 }}>
+      <p style={{ fontSize:19,
+                  fontWeight:700, color:"var(--accent)", marginBottom:8 }}>
         오늘 큐티 인증 완료!
       </p>
       <p style={{ fontSize:14, color:"var(--muted)" }}>
@@ -141,12 +141,12 @@ export default function UploadCard({ onSuccess, selectedDate }) {
         {/* 비공개 스위치 */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between",
                       marginTop:16, padding:"12px 16px",
-                      background:"var(--bg)", borderRadius:10,
-                      border:"1px solid var(--border)" }}>
+                      background:"var(--bg2)", borderRadius:12,
+                      border:"1px solid transparent" }}>
           <div>
-            <p style={{ fontSize:13, color:"var(--text)", fontWeight:500 }}>비공개</p>
+            <p style={{ fontSize:13, color:"var(--text)", fontWeight:600 }}>비공개</p>
             <p style={{ fontSize:11, color:"var(--muted)", marginTop:2 }}>
-              {isPrivate ? "피드에서 이미지가 블러 처리됩니다" : "피드에 이미지가 공개됩니다"}
+              {isPrivate ? "나에게만 보이고 팀 피드에는 노출되지 않아요" : "팀 피드에 공개돼요"}
             </p>
           </div>
           <label className="toggle-switch">

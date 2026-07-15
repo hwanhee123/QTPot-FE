@@ -89,11 +89,11 @@ export default function Admin() {
                       </span>
                     </td>
                     <td style={{ padding:"10px 14px", color:"var(--accent)",
-                                  fontFamily:"Cormorant Garamond,serif", fontSize:18 }}>
+                                  fontWeight:700, fontSize:15 }}>
                       {m.thisMonthCount}일
                     </td>
                     <td style={{ padding:"10px 14px", color:"var(--accent)",
-                                  fontFamily:"Cormorant Garamond,serif", fontSize:18 }}>
+                                  fontWeight:700, fontSize:15 }}>
                       {m.yearCount}일
                     </td>
                     <td style={{ padding:"10px 14px", color:"var(--muted)" }}>
@@ -123,15 +123,14 @@ export default function Admin() {
             <input type="date" value={date} onChange={e => setDate(e.target.value)}
               style={{ padding:"7px 12px", background:"var(--surface)",
                        border:"1px solid var(--border)", borderRadius:8,
-                       fontFamily:"Noto Sans KR,sans-serif",
                        fontSize:13, color:"var(--text)", outline:"none" }} />
             <button className="btn btn-primary btn-sm" onClick={handleFeedSearch}>
               조회
             </button>
             {feed.length > 0 && (
               <span style={{
-                fontFamily:"Cormorant Garamond,serif",
-                fontSize:18, color:"var(--accent)", marginLeft:8
+                fontWeight:700,
+                fontSize:15, color:"var(--accent)", marginLeft:8
               }}>
                 총 {feed.length}명 인증
               </span>

@@ -1,5 +1,6 @@
 import Navbar from "./Navbar";
- 
+import QtFab from "./QtFab";
+
 export default function Layout({ children }) {
   return (
     <div className="layout">
@@ -7,6 +8,7 @@ export default function Layout({ children }) {
       <div className="main-content">
         {children}
       </div>
+      <QtFab />
     </div>
   );
 }
