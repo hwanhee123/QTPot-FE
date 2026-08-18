@@ -63,12 +63,14 @@ export default function Signup() {
             <div className="form-group">
               <label>비밀번호</label>
               <input type="password" name="password" required minLength={8}
+                autoComplete="new-password"
                 placeholder="8자 이상"
                 value={form.password} onChange={handleChange} />
             </div>
             <div className="form-group">
               <label>비밀번호 확인</label>
-              <input type="password" required
+              <input type="password" required minLength={8}
+                autoComplete="new-password"
                 placeholder="비밀번호를 한 번 더 입력하세요"
                 value={confirm} onChange={e => setConfirm(e.target.value)} />
             </div>

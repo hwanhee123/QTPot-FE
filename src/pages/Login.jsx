@@ -45,6 +45,7 @@ export default function Login() {
           <div className="form-group">
             <label>비밀번호</label>
             <input type="password" name="password" required
+              autoComplete="current-password"
               placeholder="••••••••"
               value={form.password} onChange={handleChange} />
           </div>

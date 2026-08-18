@@ -184,18 +184,21 @@ export default function Profile() {
           <div className="form-group">
             <label>현재 비밀번호</label>
             <input type="password" placeholder="현재 비밀번호 입력"
+              autoComplete="current-password"
               value={pwForm.currentPassword}
               onChange={e => setPwForm(p => ({...p, currentPassword:e.target.value}))} />
           </div>
           <div className="form-group">
             <label>새 비밀번호</label>
-            <input type="password" placeholder="8자 이상"
+            <input type="password" placeholder="8자 이상" minLength={8}
+              autoComplete="new-password"
               value={pwForm.newPassword}
               onChange={e => setPwForm(p => ({...p, newPassword:e.target.value}))} />
           </div>
           <div className="form-group">
             <label>비밀번호 확인</label>
-            <input type="password" placeholder="동일하게 입력"
+            <input type="password" placeholder="동일하게 입력" minLength={8}
+              autoComplete="new-password"
               value={pwForm.confirm}
               onChange={e => setPwForm(p => ({...p, confirm:e.target.value}))} />
           </div>
