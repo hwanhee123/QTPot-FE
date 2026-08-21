@@ -76,7 +76,7 @@ function DrumColumn({ items, defaultValue, onChange }) {
           WebkitOverflowScrolling: "touch",
           paddingTop: PAD * ITEM_HEIGHT,
           paddingBottom: PAD * ITEM_HEIGHT,
-          boxSizing: "content-box",
+          boxSizing: "border-box",
         }}
       >
         <style>{`div::-webkit-scrollbar{display:none}`}</style>
