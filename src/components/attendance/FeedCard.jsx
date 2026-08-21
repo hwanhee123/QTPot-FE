@@ -59,8 +59,10 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
     setDeleting(true);
     try {
       await onDelete(item.id);
-    } catch {
-      // onDelete(부모의 handleDelete)가 자체적으로 실패 알림을 처리함
+    } catch (err) {
+      // onDelete(부모의 handleDelete)가 보통 자체적으로 실패 알림을 처리하지만,
+      // 혹시 처리 안 하고 그냥 던지는 구현이 들어와도 조용히 묻히지 않도록 방어
+      alertUnlessSessionExpired(err, "삭제에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setDeleting(false);
     }
