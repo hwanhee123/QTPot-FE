@@ -57,10 +57,14 @@ export default function Dashboard() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("정말 삭제할까요?")) return;
-    await deleteAttendance(id);
-    setAllPosts(prev => prev.filter(p => p.id !== id));
-    if (selectedPost?.id === id) setSelectedPost(null);
-    setRefreshKey(k => k + 1);
+    try {
+      await deleteAttendance(id);
+      setAllPosts(prev => prev.filter(p => p.id !== id));
+      if (selectedPost?.id === id) setSelectedPost(null);
+      setRefreshKey(k => k + 1);
+    } catch {
+      alert("삭제에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleEditContent = async (id, content) => {

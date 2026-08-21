@@ -48,8 +48,12 @@ export default function Feed() {
 
   const handleDelete = async (id) => {
     if (!window.confirm("정말 삭제할까요?")) return;
-    await deleteAttendance(id);
-    setItems(prev => prev.filter(i => i.id !== id));
+    try {
+      await deleteAttendance(id);
+      setItems(prev => prev.filter(i => i.id !== id));
+    } catch {
+      alert("삭제에 실패했습니다. 다시 시도해주세요.");
+    }
   };
 
   const handleEditContent = async (id, content) => {
