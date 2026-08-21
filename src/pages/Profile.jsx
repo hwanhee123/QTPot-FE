@@ -10,6 +10,7 @@ import { getMyAttendanceCount, getMyAttendance,
 import { changeMyPassword } from "../api/memberApi";
 import { useAuth } from "../context/AuthContext";
 import { getYearMonth, getMonthLabel, getDaysInMonth } from "../utils/dateUtils";
+import { alertUnlessSessionExpired } from "../utils/errorUtils";
  
 export default function Profile() {
   const { user, updateUser } = useAuth();
@@ -51,10 +52,7 @@ export default function Profile() {
       setMyPosts(prev => prev.filter(p => p.id !== id));
       setCount(c => c - 1);
     } catch (err) {
-      // 401은 axios 인터셉터가 이미 로그인 페이지로 이동시키며 처리함
-      if (err.response?.status !== 401) {
-        alert("삭제에 실패했습니다. 다시 시도해주세요.");
-      }
+      alertUnlessSessionExpired(err, "삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
  

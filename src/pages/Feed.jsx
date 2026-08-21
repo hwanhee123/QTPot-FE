@@ -4,6 +4,7 @@ import FeedCard from "../components/attendance/FeedCard";
 import { getFeed, updateAttendanceContent, deleteAttendance }
   from "../api/attendanceApi";
 import { useAuth } from "../context/AuthContext";
+import { alertUnlessSessionExpired } from "../utils/errorUtils";
 
 export default function Feed() {
   const { user }            = useAuth();
@@ -52,10 +53,7 @@ export default function Feed() {
       await deleteAttendance(id);
       setItems(prev => prev.filter(i => i.id !== id));
     } catch (err) {
-      // 401은 axios 인터셉터가 이미 로그인 페이지로 이동시키며 처리함
-      if (err.response?.status !== 401) {
-        alert("삭제에 실패했습니다. 다시 시도해주세요.");
-      }
+      alertUnlessSessionExpired(err, "삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 

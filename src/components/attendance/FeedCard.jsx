@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getComments, addComment, deleteComment, toggleLike } from "../../api/attendanceApi";
 import { useAuth } from "../../context/AuthContext";
+import { alertUnlessSessionExpired } from "../../utils/errorUtils";
 
 export default function FeedCard({ item, onDelete, onEditContent, isMine, showOriginal = false }) {
   const { user } = useAuth();
@@ -8,6 +9,7 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
   const [editMode,    setEditMode]    = useState(false);
   const [editContent, setEditContent] = useState(item.content || "");
   const [saving,      setSaving]      = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
 
   // 좋아요 상태
   const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
@@ -45,10 +47,19 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
     try {
       await onEditContent(item.id, editContent);
       setEditMode(false);
-    } catch {
-      alert("소감 저장에 실패했습니다. 다시 시도해주세요.");
+    } catch (err) {
+      alertUnlessSessionExpired(err, "소감 저장에 실패했습니다. 다시 시도해주세요.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    setDeleting(true);
+    try {
+      await onDelete(item.id);
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -167,11 +178,12 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
               소감 수정
             </button>
             <button className="btn btn-sm"
-              onClick={() => onDelete(item.id)}
+              onClick={handleDeleteClick}
+              disabled={deleting}
               style={{ color:"var(--danger)", border:"1px solid var(--danger)",
                         background:"transparent", borderRadius:8,
                         padding:"7px 16px", fontSize:13, cursor:"pointer" }}>
-              삭제
+              {deleting ? "삭제 중..." : "삭제"}
             </button>
           </div>
         )}

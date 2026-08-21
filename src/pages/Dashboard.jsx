@@ -5,6 +5,7 @@ import AttendanceCalendar from "../components/attendance/AttendanceCalendar";
 import FeedCard from "../components/attendance/FeedCard";
 import { useAuth } from "../context/AuthContext";
 import { getYearMonth, getMonthLabel } from "../utils/dateUtils";
+import { alertUnlessSessionExpired } from "../utils/errorUtils";
 import { getMyAllAttendance, deleteAttendance, updateAttendanceContent } from "../api/attendanceApi";
 
 export default function Dashboard() {
@@ -63,10 +64,7 @@ export default function Dashboard() {
       if (selectedPost?.id === id) setSelectedPost(null);
       setRefreshKey(k => k + 1);
     } catch (err) {
-      // 401은 axios 인터셉터가 이미 로그인 페이지로 이동시키며 처리함
-      if (err.response?.status !== 401) {
-        alert("삭제에 실패했습니다. 다시 시도해주세요.");
-      }
+      alertUnlessSessionExpired(err, "삭제에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
