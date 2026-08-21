@@ -62,8 +62,11 @@ export default function Dashboard() {
       setAllPosts(prev => prev.filter(p => p.id !== id));
       if (selectedPost?.id === id) setSelectedPost(null);
       setRefreshKey(k => k + 1);
-    } catch {
-      alert("삭제에 실패했습니다. 다시 시도해주세요.");
+    } catch (err) {
+      // 401은 axios 인터셉터가 이미 로그인 페이지로 이동시키며 처리함
+      if (err.response?.status !== 401) {
+        alert("삭제에 실패했습니다. 다시 시도해주세요.");
+      }
     }
   };
 

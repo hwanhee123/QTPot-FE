@@ -42,9 +42,14 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
 
   const handleSave = async () => {
     setSaving(true);
-    await onEditContent(item.id, editContent);
-    setEditMode(false);
-    setSaving(false);
+    try {
+      await onEditContent(item.id, editContent);
+      setEditMode(false);
+    } catch {
+      alert("소감 저장에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleAddComment = async (e) => {

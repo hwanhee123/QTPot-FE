@@ -46,9 +46,16 @@ export default function Profile() {
  
   const handleDelete = async (id) => {
     if (!window.confirm("정말 삭제할까요?")) return;
-    await deleteAttendance(id);
-    setMyPosts(prev => prev.filter(p => p.id !== id));
-    setCount(c => c - 1);
+    try {
+      await deleteAttendance(id);
+      setMyPosts(prev => prev.filter(p => p.id !== id));
+      setCount(c => c - 1);
+    } catch (err) {
+      // 401은 axios 인터셉터가 이미 로그인 페이지로 이동시키며 처리함
+      if (err.response?.status !== 401) {
+        alert("삭제에 실패했습니다. 다시 시도해주세요.");
+      }
+    }
   };
  
   const handleEditContent = async (id, content) => {
