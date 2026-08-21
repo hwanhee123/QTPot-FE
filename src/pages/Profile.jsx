@@ -2,60 +2,42 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/common/Layout";
 import BadgeCard from "../components/badge/BadgeCard";
-import FeedCard from "../components/attendance/FeedCard";
 import { getMyBadges } from "../api/badgeApi";
-import { getMyAttendanceCount, getMyAttendance,
-         deleteAttendance, updateAttendanceContent,
-         getMyTotalCount } from "../api/attendanceApi";
+import { getMyAttendanceCount, getMyTotalCount } from "../api/attendanceApi";
 import { changeMyPassword } from "../api/memberApi";
 import { useAuth } from "../context/AuthContext";
 import { getYearMonth, getMonthLabel, getDaysInMonth } from "../utils/dateUtils";
- 
+
 export default function Profile() {
   const { user, updateUser } = useAuth();
   const { year, month } = getYearMonth();
   const navigate        = useNavigate();
- 
+
   const [badges,     setBadges]     = useState([]);
   const [count,      setCount]      = useState(0);
   const [yearCount,  setYearCount]  = useState(0);
   const [totalCount, setTotalCount] = useState(0);
-  const [myPosts,    setMyPosts]    = useState([]);
   const [loading,    setLoading]    = useState(true);
- 
+
   const [pwForm,    setPwForm]    = useState({ currentPassword:"", newPassword:"", confirm:"" });
   const [pwError,   setPwError]   = useState("");
   const [pwOk,      setPwOk]      = useState(false);
   const [pwLoading, setPwLoading] = useState(false);
- 
+
   useEffect(() => {
     Promise.all([
       getMyBadges(),
       getMyAttendanceCount(year, month),
-      getMyAttendance(year, month),
       getMyTotalCount(),
       getMyAttendanceCount(year, 0),
-    ]).then(([b, c, posts, total, yearC]) => {
+    ]).then(([b, c, total, yearC]) => {
       setBadges(b.data);
       setCount(c.data);
-      setMyPosts(posts.data);
       setTotalCount(total.data);
       setYearCount(yearC.data);
     }).finally(() => setLoading(false));
   }, []);
- 
-  const handleDelete = async (id) => {
-    if (!window.confirm("정말 삭제할까요?")) return;
-    await deleteAttendance(id);
-    setMyPosts(prev => prev.filter(p => p.id !== id));
-    setCount(c => c - 1);
-  };
- 
-  const handleEditContent = async (id, content) => {
-    await updateAttendanceContent(id, content);
-    setMyPosts(prev => prev.map(p => p.id===id ? {...p, content} : p));
-  };
- 
+
   const handlePwChange = async (e) => {
     e.preventDefault();
     setPwError(""); setPwOk(false);

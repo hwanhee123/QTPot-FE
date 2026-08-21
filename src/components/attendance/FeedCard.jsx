@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { getComments, addComment, deleteComment, toggleLike } from "../../api/attendanceApi";
 import { useAuth } from "../../context/AuthContext";
+import { alertUnlessSessionExpired } from "../../utils/errorUtils";
 
 export default function FeedCard({ item, onDelete, onEditContent, isMine, showOriginal = false }) {
   const { user } = useAuth();
@@ -8,6 +9,7 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
   const [editMode,    setEditMode]    = useState(false);
   const [editContent, setEditContent] = useState(item.content || "");
   const [saving,      setSaving]      = useState(false);
+  const [deleting,    setDeleting]    = useState(false);
 
   // 좋아요 상태
   const [likeCount, setLikeCount] = useState(item.likeCount ?? 0);
@@ -42,9 +44,28 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
 
   const handleSave = async () => {
     setSaving(true);
-    await onEditContent(item.id, editContent);
-    setEditMode(false);
-    setSaving(false);
+    try {
+      await onEditContent(item.id, editContent);
+      setEditMode(false);
+    } catch (err) {
+      alertUnlessSessionExpired(err, "소감 저장에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeleteClick = async () => {
+    if (!window.confirm("정말 삭제할까요?")) return;
+    setDeleting(true);
+    try {
+      await onDelete(item.id);
+    } catch (err) {
+      // onDelete(부모의 handleDelete)가 보통 자체적으로 실패 알림을 처리하지만,
+      // 혹시 처리 안 하고 그냥 던지는 구현이 들어와도 조용히 묻히지 않도록 방어
+      alertUnlessSessionExpired(err, "삭제에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      setDeleting(false);
+    }
   };
 
   const handleAddComment = async (e) => {
@@ -55,8 +76,8 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
       const res = await addComment(item.id, commentInput.trim());
       setComments(prev => [...prev, res.data]);
       setCommentInput("");
-    } catch {
-      alert("댓글 등록에 실패했습니다.");
+    } catch (err) {
+      alertUnlessSessionExpired(err, "댓글 등록에 실패했습니다.");
     } finally { setSubmitting(false); }
   };
 
@@ -65,8 +86,8 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
     try {
       await deleteComment(item.id, commentId);
       setComments(prev => prev.filter(c => c.id !== commentId));
-    } catch {
-      alert("댓글 삭제에 실패했습니다.");
+    } catch (err) {
+      alertUnlessSessionExpired(err, "댓글 삭제에 실패했습니다.");
     }
   };
 
@@ -162,11 +183,12 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
               소감 수정
             </button>
             <button className="btn btn-sm"
-              onClick={() => onDelete(item.id)}
+              onClick={handleDeleteClick}
+              disabled={deleting}
               style={{ color:"var(--danger)", border:"1px solid var(--danger)",
                         background:"transparent", borderRadius:8,
                         padding:"7px 16px", fontSize:13, cursor:"pointer" }}>
-              삭제
+              {deleting ? "삭제 중..." : "삭제"}
             </button>
           </div>
         )}
