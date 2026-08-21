@@ -46,7 +46,6 @@ export default function Profile() {
   }, []);
  
   const handleDelete = async (id) => {
-    if (!window.confirm("정말 삭제할까요?")) return;
     try {
       await deleteAttendance(id);
       setMyPosts(prev => prev.filter(p => p.id !== id));

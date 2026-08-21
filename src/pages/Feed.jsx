@@ -48,7 +48,6 @@ export default function Feed() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("정말 삭제할까요?")) return;
     try {
       await deleteAttendance(id);
       setItems(prev => prev.filter(i => i.id !== id));

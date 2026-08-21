@@ -55,9 +55,12 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
   };
 
   const handleDeleteClick = async () => {
+    if (!window.confirm("정말 삭제할까요?")) return;
     setDeleting(true);
     try {
       await onDelete(item.id);
+    } catch {
+      // onDelete(부모의 handleDelete)가 자체적으로 실패 알림을 처리함
     } finally {
       setDeleting(false);
     }
@@ -71,8 +74,8 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
       const res = await addComment(item.id, commentInput.trim());
       setComments(prev => [...prev, res.data]);
       setCommentInput("");
-    } catch {
-      alert("댓글 등록에 실패했습니다.");
+    } catch (err) {
+      alertUnlessSessionExpired(err, "댓글 등록에 실패했습니다.");
     } finally { setSubmitting(false); }
   };
 
@@ -81,8 +84,8 @@ export default function FeedCard({ item, onDelete, onEditContent, isMine, showOr
     try {
       await deleteComment(item.id, commentId);
       setComments(prev => prev.filter(c => c.id !== commentId));
-    } catch {
-      alert("댓글 삭제에 실패했습니다.");
+    } catch (err) {
+      alertUnlessSessionExpired(err, "댓글 삭제에 실패했습니다.");
     }
   };
 

@@ -57,7 +57,6 @@ export default function Dashboard() {
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm("정말 삭제할까요?")) return;
     try {
       await deleteAttendance(id);
       setAllPosts(prev => prev.filter(p => p.id !== id));
