@@ -8,6 +8,13 @@ import { getYearMonth, getMonthLabel } from "../utils/dateUtils";
 import { alertUnlessSessionExpired } from "../utils/errorUtils";
 import { getMyAllAttendance, deleteAttendance, updateAttendanceContent } from "../api/attendanceApi";
 
+function getGreeting(hour) {
+  if (hour < 5)  return "새벽 QT";
+  if (hour < 12) return "아침 QT";
+  if (hour < 18) return "오후 QT";
+  return "저녁 QT";
+}
+
 export default function Dashboard() {
   const { user, loading } = useAuth();
   const { year, month }   = getYearMonth();
@@ -80,11 +87,9 @@ export default function Dashboard() {
 
   return (
     <Layout>
-      <div className="page-header">
-        <div>
-          <h2 className="page-title">안녕하세요, {user.name}님</h2>
-          <p className="page-subtitle">{getMonthLabel(viewYear, viewMonth)} 큐티 현황</p>
-        </div>
+      <div className="qt-hero fade-in">
+        <p className="qt-hero-eyebrow">{getGreeting(new Date().getHours())} · {getMonthLabel(viewYear, viewMonth)}</p>
+        <h2 className="qt-hero-title">{user.name}님,<br />오늘 받은 말씀은 어떠셨나요?</h2>
       </div>
 
       <div className="dashboard-grid fade-in">

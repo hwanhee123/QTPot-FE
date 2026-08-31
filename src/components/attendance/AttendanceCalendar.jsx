@@ -37,6 +37,11 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
   const startDay     = getFirstDayOfWeek(year, month);
   const goal         = month === 2 ? totalDays : 30;
   const progress     = Math.min((count / goal) * 100, 100);
+  const achieved     = count >= goal;
+
+  const now = new Date();
+  const isToday = (day) =>
+    year === now.getFullYear() && month === now.getMonth() + 1 && day === now.getDate();
 
   const isMaxMonth = maxYear && maxMonth
     ? (year > maxYear || (year === maxYear && month >= maxMonth))
@@ -60,13 +65,13 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
   return (
     <div className="calendar-wrap">
       <div className="calendar-header">
-        <span className="calendar-title">{year}년 {month}월</span>
-        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
-          {!loading && !error && (
-            <span className={`calendar-count ${count >= goal ? "achieved" : ""}`}>
-              {count}일 인증{count >= goal && " 🏅"}
-            </span>
+        <div>
+          <span className="calendar-title">{year}년 {month}월</span>
+          {!loading && !error && achieved && (
+            <span className="qt-goal-tag">목표 달성 🏅</span>
           )}
+        </div>
+        <div style={{ display:"flex", alignItems:"center", gap:8 }}>
           <button onClick={handlePrev}
             style={navBtnStyle}>‹</button>
           <button onClick={handleNext} disabled={isMaxMonth}
@@ -93,11 +98,11 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
               <div
                 key={day}
                 onClick={() => handleDayClick(day)}
-                className={`calendar-day ${attendedDays.has(day) ? "attended" : ""}`}
+                className={`calendar-day ${attendedDays.has(day) ? "attended" : ""} ${isToday(day) ? "today" : ""}`}
                 style={{
                   cursor: "pointer",
                   outline: selectedDay === day ? "2px solid var(--accent)" : "none",
-                  borderRadius: 6,
+                  outlineOffset: 2,
                 }}
               >
                 {day}
@@ -105,14 +110,16 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
             ))}
           </div>
 
-          <div className="progress-wrap">
-            <div className="progress-label">
-              <span>{goal}일 목표</span>
-              <span>{count} / {goal}일</span>
+          <div className="qt-progress-row">
+            <div className="qt-progress-ring" style={{ "--progress": progress }}>
+              <div className="qt-progress-ring-inner">
+                <span className="qt-progress-ring-num">{count}</span>
+                <span className="qt-progress-ring-goal">/ {goal}일</span>
+              </div>
             </div>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${progress}%` }} />
-            </div>
+            <p className="qt-progress-caption">
+              {achieved ? "이번 달 목표를 달성했어요." : `목표까지 ${goal - count}일 남았어요.`}
+            </p>
           </div>
         </>
       )}

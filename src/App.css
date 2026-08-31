@@ -259,12 +259,37 @@ body {
   transform: translateY(-1px);
 }
 
+/* ─────────────── QT 홈 히어로 ─────────────── */
+.qt-hero-eyebrow {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent2);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.qt-hero-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+}
+
+@media (max-width: 640px) {
+  .qt-hero-title { font-size: 21px; }
+}
+
 /* ─────────────── Dashboard Grid ─────────────── */
 .dashboard-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 20px;
 }
+
+.dashboard-grid > *  { animation: fadeIn 0.4s ease both; }
+.dashboard-grid > *:nth-child(2) { animation-delay: 0.08s; }
 
 @media (max-width: 640px) {
   .dashboard-grid { grid-template-columns: 1fr; }
@@ -357,21 +382,16 @@ body {
   color: var(--text);
 }
 
-.calendar-count {
+.qt-goal-tag {
   display: inline-block;
-  background: var(--bg2);
-  border: 1px solid transparent;
-  border-radius: 20px;
-  padding: 4px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--accent);
-}
-
-.calendar-count.achieved {
+  margin-left: 8px;
   background: rgba(75,107,58,0.12);
-  color: var(--accent);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 11px;
   font-weight: 700;
+  color: var(--accent);
+  vertical-align: middle;
 }
 
 .calendar-days {
@@ -407,27 +427,53 @@ body {
   box-shadow: 0 2px 8px rgba(75,107,58,0.4);
 }
 
-/* 진행률 바 */
-.progress-wrap { margin-top: 18px; }
-.progress-label {
+.calendar-day.today:not(.attended) {
+  background: var(--surface);
+  border: 1.5px solid var(--accent2);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* 이번 달 인증 현황 (원형 프로그레스) */
+.qt-progress-row {
+  margin-top: 22px;
   display: flex;
-  justify-content: space-between;
-  font-size: 11px;
+  align-items: center;
+  gap: 18px;
+}
+
+.qt-progress-ring {
+  --progress: 0;
+  flex-shrink: 0;
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: conic-gradient(var(--accent) calc(var(--progress) * 1%), var(--bg2) 0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.6s ease;
+}
+
+.qt-progress-ring-inner {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.1;
+}
+
+.qt-progress-ring-num { font-size: 17px; font-weight: 700; color: var(--text); }
+.qt-progress-ring-goal { font-size: 10px; color: var(--muted); margin-top: 1px; }
+
+.qt-progress-caption {
+  font-size: 13px;
   color: var(--muted);
-  letter-spacing: 0.02em;
-  margin-bottom: 6px;
-}
-.progress-bar {
-  height: 6px;
-  background: var(--bg2);
-  border-radius: 3px;
-  overflow: hidden;
-}
-.progress-fill {
-  height: 100%;
-  background: linear-gradient(90deg, var(--accent2), var(--accent));
-  border-radius: 3px;
-  transition: width 0.6s ease;
+  line-height: 1.5;
 }
 
 /* ─────────────── Ranking ─────────────── */
