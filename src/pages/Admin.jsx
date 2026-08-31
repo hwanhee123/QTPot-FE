@@ -16,6 +16,7 @@ export default function Admin() {
   const [tab,      setTab]      = useState("members");
   const [retryTick, setRetryTick] = useState(0);
   const requestIdRef = useRef(0);
+  const feedRequestIdRef = useRef(0);
 
   useEffect(() => {
     const reqId = ++requestIdRef.current;
@@ -43,14 +44,19 @@ export default function Admin() {
 
   const handleFeedSearch = async () => {
     if (!date) return alert("날짜를 선택해주세요.");
+    const reqId = ++feedRequestIdRef.current;
     setLoadingF(true);
     try {
       const r = await getAdminAttendanceByDate(date);
+      if (reqId !== feedRequestIdRef.current) return; // 그 사이 다른 날짜로 재조회함 — 이 응답은 버림
       setFeed(r.data);
     } catch (err) {
+      if (reqId !== feedRequestIdRef.current) return;
       setFeed([]); // 실패한 조회의 결과로 이전 날짜의 조회 결과가 그대로 남아있지 않도록
       alertUnlessSessionExpired(err, "조회에 실패했습니다. 다시 시도해주세요.");
-    } finally { setLoadingF(false); }
+    } finally {
+      if (reqId === feedRequestIdRef.current) setLoadingF(false);
+    }
   };
  
   return (
@@ -146,7 +152,7 @@ export default function Admin() {
               style={{ padding:"7px 12px", background:"var(--surface)",
                        border:"1px solid var(--border)", borderRadius:8,
                        fontSize:13, color:"var(--text)", outline:"none" }} />
-            <button className="btn btn-primary btn-sm" onClick={handleFeedSearch}>
+            <button className="btn btn-primary btn-sm" onClick={handleFeedSearch} disabled={loadingF}>
               조회
             </button>
             {feed.length > 0 && (
