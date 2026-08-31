@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/common/Layout";
 import BadgeCard from "../components/badge/BadgeCard";
+import RetryError from "../components/common/RetryError";
 import { getMyBadges } from "../api/badgeApi";
 import { getMyAttendanceCount, getMyTotalCount } from "../api/attendanceApi";
 import { changeMyPassword } from "../api/memberApi";
@@ -18,6 +19,9 @@ export default function Profile() {
   const [yearCount,  setYearCount]  = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [loading,    setLoading]    = useState(true);
+  const [loadError,  setLoadError]  = useState(false);
+  const [retryTick,  setRetryTick]  = useState(0);
+  const requestIdRef = useRef(0);
 
   const [pwForm,    setPwForm]    = useState({ currentPassword:"", newPassword:"", confirm:"" });
   const [pwError,   setPwError]   = useState("");
@@ -25,18 +29,27 @@ export default function Profile() {
   const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
+    const reqId = ++requestIdRef.current;
+    setLoading(true);
+    setLoadError(false);
     Promise.all([
       getMyBadges(),
       getMyAttendanceCount(year, month),
       getMyTotalCount(),
       getMyAttendanceCount(year, 0),
     ]).then(([b, c, total, yearC]) => {
+      if (reqId !== requestIdRef.current) return;
       setBadges(b.data);
       setCount(c.data);
       setTotalCount(total.data);
       setYearCount(yearC.data);
-    }).finally(() => setLoading(false));
-  }, []);
+    }).catch((err) => {
+      if (reqId !== requestIdRef.current) return;
+      if (err.response?.status !== 401) setLoadError(true);
+    }).finally(() => {
+      if (reqId === requestIdRef.current) setLoading(false);
+    });
+  }, [retryTick]);
 
   const handlePwChange = async (e) => {
     e.preventDefault();
@@ -57,7 +70,13 @@ export default function Profile() {
   };
  
   if (loading) return <Layout><div className="loading">불러오는 중...</div></Layout>;
- 
+
+  if (loadError) return (
+    <Layout>
+      <RetryError message="정보를 불러오지 못했습니다." onRetry={() => setRetryTick(t => t + 1)} />
+    </Layout>
+  );
+
   return (
     <Layout>
       {/* 배너 */}

@@ -1,36 +1,62 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "../components/common/Layout";
 import FeedCard from "../components/attendance/FeedCard";
+import RetryError from "../components/common/RetryError";
+import { alertUnlessSessionExpired } from "../utils/errorUtils";
 import { getAdminMembers, resetMemberPassword,
          getAdminAttendanceByDate } from "../api/memberApi";
- 
+
 export default function Admin() {
   const [members,  setMembers]  = useState([]);
   const [date,     setDate]     = useState("");
   const [feed,     setFeed]     = useState([]);
   const [loadingM, setLoadingM] = useState(true);
   const [loadingF, setLoadingF] = useState(false);
+  const [errorM,   setErrorM]   = useState(false);
   const [tab,      setTab]      = useState("members");
- 
+  const [retryTick, setRetryTick] = useState(0);
+  const requestIdRef = useRef(0);
+  const feedRequestIdRef = useRef(0);
+
   useEffect(() => {
+    const reqId = ++requestIdRef.current;
+    setLoadingM(true);
+    setErrorM(false);
     getAdminMembers()
-      .then(r => setMembers(r.data))
-      .finally(() => setLoadingM(false));
-  }, []);
- 
+      .then(r => {
+        if (reqId !== requestIdRef.current) return;
+        setMembers(r.data);
+      })
+      .catch((err) => {
+        if (reqId !== requestIdRef.current) return;
+        if (err.response?.status !== 401) setErrorM(true);
+      })
+      .finally(() => {
+        if (reqId === requestIdRef.current) setLoadingM(false);
+      });
+  }, [retryTick]);
+
   const handleReset = async (id, name) => {
     if (!window.confirm(`${name}님의 비밀번호를 123456789로 초기화할까요?`)) return;
     await resetMemberPassword(id);
     alert("초기화되었습니다.");
   };
- 
+
   const handleFeedSearch = async () => {
     if (!date) return alert("날짜를 선택해주세요.");
+    const reqId = ++feedRequestIdRef.current;
     setLoadingF(true);
     try {
       const r = await getAdminAttendanceByDate(date);
+      if (reqId !== feedRequestIdRef.current) return; // 그 사이 다른 날짜로 재조회함 — 이 응답은 버림
       setFeed(r.data);
-    } finally { setLoadingF(false); }
+    } catch (err) {
+      if (reqId !== feedRequestIdRef.current) return;
+      setFeed([]); // 실패한 조회의 결과로 이전 날짜의 조회 결과가 그대로 남아있지 않도록
+      alertUnlessSessionExpired(err, "조회에 실패했습니다. 다시 시도해주세요.");
+    } finally {
+      if (reqId === feedRequestIdRef.current) setLoadingF(false);
+    }
   };
  
   return (
@@ -59,7 +85,9 @@ export default function Admin() {
  
       {/* ── 멤버 관리 탭 ── */}
       {tab === "members" && (
-        loadingM ? <div className="loading">불러오는 중...</div> : (
+        loadingM ? <div className="loading">불러오는 중...</div> : errorM ? (
+          <RetryError message="멤버 목록을 불러오지 못했습니다." onRetry={() => setRetryTick(t => t + 1)} />
+        ) : (
           <div style={{ overflowX:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse",
                             fontFamily:"Noto Sans KR,sans-serif", fontSize:13 }}>
@@ -124,7 +152,7 @@ export default function Admin() {
               style={{ padding:"7px 12px", background:"var(--surface)",
                        border:"1px solid var(--border)", borderRadius:8,
                        fontSize:13, color:"var(--text)", outline:"none" }} />
-            <button className="btn btn-primary btn-sm" onClick={handleFeedSearch}>
+            <button className="btn btn-primary btn-sm" onClick={handleFeedSearch} disabled={loadingF}>
               조회
             </button>
             {feed.length > 0 && (
