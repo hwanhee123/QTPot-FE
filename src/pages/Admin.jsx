@@ -1,9 +1,11 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Layout from "../components/common/Layout";
 import FeedCard from "../components/attendance/FeedCard";
+import RetryError from "../components/common/RetryError";
+import { alertUnlessSessionExpired } from "../utils/errorUtils";
 import { getAdminMembers, resetMemberPassword,
          getAdminAttendanceByDate } from "../api/memberApi";
- 
+
 export default function Admin() {
   const [members,  setMembers]  = useState([]);
   const [date,     setDate]     = useState("");
@@ -13,30 +15,40 @@ export default function Admin() {
   const [errorM,   setErrorM]   = useState(false);
   const [tab,      setTab]      = useState("members");
   const [retryTick, setRetryTick] = useState(0);
+  const requestIdRef = useRef(0);
 
   useEffect(() => {
+    const reqId = ++requestIdRef.current;
     setLoadingM(true);
     setErrorM(false);
     getAdminMembers()
-      .then(r => setMembers(r.data))
+      .then(r => {
+        if (reqId !== requestIdRef.current) return;
+        setMembers(r.data);
+      })
       .catch((err) => {
+        if (reqId !== requestIdRef.current) return;
         if (err.response?.status !== 401) setErrorM(true);
       })
-      .finally(() => setLoadingM(false));
+      .finally(() => {
+        if (reqId === requestIdRef.current) setLoadingM(false);
+      });
   }, [retryTick]);
- 
+
   const handleReset = async (id, name) => {
     if (!window.confirm(`${name}님의 비밀번호를 123456789로 초기화할까요?`)) return;
     await resetMemberPassword(id);
     alert("초기화되었습니다.");
   };
- 
+
   const handleFeedSearch = async () => {
     if (!date) return alert("날짜를 선택해주세요.");
     setLoadingF(true);
     try {
       const r = await getAdminAttendanceByDate(date);
       setFeed(r.data);
+    } catch (err) {
+      alertUnlessSessionExpired(err, "조회에 실패했습니다. 다시 시도해주세요.");
     } finally { setLoadingF(false); }
   };
  
@@ -67,14 +79,7 @@ export default function Admin() {
       {/* ── 멤버 관리 탭 ── */}
       {tab === "members" && (
         loadingM ? <div className="loading">불러오는 중...</div> : errorM ? (
-          <div className="empty-state">
-            <div className="icon">⚠️</div>
-            <p>멤버 목록을 불러오지 못했습니다.</p>
-            <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}
-              onClick={() => setRetryTick(t => t + 1)}>
-              다시 시도
-            </button>
-          </div>
+          <RetryError message="멤버 목록을 불러오지 못했습니다." onRetry={() => setRetryTick(t => t + 1)} />
         ) : (
           <div style={{ overflowX:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse",

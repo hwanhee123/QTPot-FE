@@ -1,7 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/common/Layout";
 import BadgeCard from "../components/badge/BadgeCard";
+import RetryError from "../components/common/RetryError";
 import { getMyBadges } from "../api/badgeApi";
 import { getMyAttendanceCount, getMyTotalCount } from "../api/attendanceApi";
 import { changeMyPassword } from "../api/memberApi";
@@ -20,6 +21,7 @@ export default function Profile() {
   const [loading,    setLoading]    = useState(true);
   const [loadError,  setLoadError]  = useState(false);
   const [retryTick,  setRetryTick]  = useState(0);
+  const requestIdRef = useRef(0);
 
   const [pwForm,    setPwForm]    = useState({ currentPassword:"", newPassword:"", confirm:"" });
   const [pwError,   setPwError]   = useState("");
@@ -27,6 +29,7 @@ export default function Profile() {
   const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
+    const reqId = ++requestIdRef.current;
     setLoading(true);
     setLoadError(false);
     Promise.all([
@@ -35,13 +38,17 @@ export default function Profile() {
       getMyTotalCount(),
       getMyAttendanceCount(year, 0),
     ]).then(([b, c, total, yearC]) => {
+      if (reqId !== requestIdRef.current) return;
       setBadges(b.data);
       setCount(c.data);
       setTotalCount(total.data);
       setYearCount(yearC.data);
     }).catch((err) => {
+      if (reqId !== requestIdRef.current) return;
       if (err.response?.status !== 401) setLoadError(true);
-    }).finally(() => setLoading(false));
+    }).finally(() => {
+      if (reqId === requestIdRef.current) setLoading(false);
+    });
   }, [retryTick]);
 
   const handlePwChange = async (e) => {
@@ -66,14 +73,7 @@ export default function Profile() {
 
   if (loadError) return (
     <Layout>
-      <div className="empty-state">
-        <div className="icon">⚠️</div>
-        <p>정보를 불러오지 못했습니다.</p>
-        <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}
-          onClick={() => setRetryTick(t => t + 1)}>
-          다시 시도
-        </button>
-      </div>
+      <RetryError message="정보를 불러오지 못했습니다." onRetry={() => setRetryTick(t => t + 1)} />
     </Layout>
   );
 

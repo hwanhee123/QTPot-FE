@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Layout from "../components/common/Layout";
 import FeedCard from "../components/attendance/FeedCard";
+import RetryError from "../components/common/RetryError";
 import { getFeed, updateAttendanceContent, deleteAttendance }
   from "../api/attendanceApi";
 import { useAuth } from "../context/AuthContext";
@@ -16,6 +17,7 @@ export default function Feed() {
   const [items,   setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error,   setError] = useState(false);
+  const requestIdRef = useRef(0);
 
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
   const firstDay = `${year}-${String(month).padStart(2,"0")}-01`;
@@ -24,16 +26,21 @@ export default function Feed() {
     : `${year}-${String(month).padStart(2,"0")}-${new Date(year, month, 0).getDate()}`;
 
   const load = useCallback(async () => {
+    const reqId = ++requestIdRef.current;
     setLoading(true);
     setError(false);
     try {
       const res = date
         ? await getFeed(date)
         : await getFeed(null, year, month);
+      if (reqId !== requestIdRef.current) return; // 그 사이 더 최신 요청이 시작됨 — 이 응답은 버림
       setItems(res.data);
     } catch (err) {
+      if (reqId !== requestIdRef.current) return;
       if (err.response?.status !== 401) setError(true);
-    } finally { setLoading(false); }
+    } finally {
+      if (reqId === requestIdRef.current) setLoading(false);
+    }
   }, [date, year, month]);
 
   useEffect(() => { load(); }, [load]);
@@ -118,13 +125,7 @@ export default function Feed() {
       {loading ? (
         <div className="loading">불러오는 중...</div>
       ) : error ? (
-        <div className="empty-state">
-          <div className="icon">⚠️</div>
-          <p>피드를 불러오지 못했습니다.</p>
-          <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={load}>
-            다시 시도
-          </button>
-        </div>
+        <RetryError message="피드를 불러오지 못했습니다." onRetry={load} />
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="icon">📖</div>
