@@ -48,6 +48,7 @@ export default function Admin() {
       const r = await getAdminAttendanceByDate(date);
       setFeed(r.data);
     } catch (err) {
+      setFeed([]); // 실패한 조회의 결과로 이전 날짜의 조회 결과가 그대로 남아있지 않도록
       alertUnlessSessionExpired(err, "조회에 실패했습니다. 다시 시도해주세요.");
     } finally { setLoadingF(false); }
   };
