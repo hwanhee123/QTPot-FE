@@ -49,9 +49,12 @@ export default function Dashboard() {
       try {
         const res = await getMyAllAttendance();
         setAllPosts(res.data);
-      } finally {
+      } catch (err) {
         setAllLoading(false);
+        alertUnlessSessionExpired(err, "전체 기록을 불러오지 못했습니다. 다시 시도해주세요.");
+        return; // 실패 시 펼치지 않음 (성공한 것처럼 빈 목록이 보이는 것 방지)
       }
+      setAllLoading(false);
     }
     setShowAll(v => !v);
   };

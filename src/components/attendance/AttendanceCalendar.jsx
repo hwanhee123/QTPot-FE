@@ -6,9 +6,12 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
   const [postsByDay, setPostsByDay] = useState(new Map());
   const [count,      setCount]      = useState(0);
   const [loading,    setLoading]    = useState(true);
+  const [error,      setError]      = useState(false);
+  const [retryTick,  setRetryTick]  = useState(0);
 
   useEffect(() => {
     setLoading(true);
+    setError(false);
     Promise.all([
       getMyAttendance(year, month),
       getMyAttendanceCount(year, month),
@@ -17,8 +20,10 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
         listRes.data.map((a) => [parseInt(a.createdDate.split("-")[2], 10), a])
       ));
       setCount(cntRes.data);
+    }).catch((err) => {
+      if (err.response?.status !== 401) setError(true);
     }).finally(() => setLoading(false));
-  }, [year, month]);
+  }, [year, month, retryTick]);
 
   const attendedDays = new Set(postsByDay.keys());
   const totalDays    = getDaysInMonth(year, month);
@@ -46,6 +51,17 @@ export default function AttendanceCalendar({ year, month, onSelectDay, selectedD
   };
 
   if (loading) return <div className="loading">불러오는 중...</div>;
+
+  if (error) return (
+    <div className="empty-state">
+      <div className="icon">⚠️</div>
+      <p>달력을 불러오지 못했습니다.</p>
+      <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}
+        onClick={() => setRetryTick(t => t + 1)}>
+        다시 시도
+      </button>
+    </div>
+  );
 
   return (
     <div className="calendar-wrap">

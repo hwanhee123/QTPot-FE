@@ -10,13 +10,20 @@ export default function Admin() {
   const [feed,     setFeed]     = useState([]);
   const [loadingM, setLoadingM] = useState(true);
   const [loadingF, setLoadingF] = useState(false);
+  const [errorM,   setErrorM]   = useState(false);
   const [tab,      setTab]      = useState("members");
- 
+  const [retryTick, setRetryTick] = useState(0);
+
   useEffect(() => {
+    setLoadingM(true);
+    setErrorM(false);
     getAdminMembers()
       .then(r => setMembers(r.data))
+      .catch((err) => {
+        if (err.response?.status !== 401) setErrorM(true);
+      })
       .finally(() => setLoadingM(false));
-  }, []);
+  }, [retryTick]);
  
   const handleReset = async (id, name) => {
     if (!window.confirm(`${name}님의 비밀번호를 123456789로 초기화할까요?`)) return;
@@ -59,7 +66,16 @@ export default function Admin() {
  
       {/* ── 멤버 관리 탭 ── */}
       {tab === "members" && (
-        loadingM ? <div className="loading">불러오는 중...</div> : (
+        loadingM ? <div className="loading">불러오는 중...</div> : errorM ? (
+          <div className="empty-state">
+            <div className="icon">⚠️</div>
+            <p>멤버 목록을 불러오지 못했습니다.</p>
+            <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}
+              onClick={() => setRetryTick(t => t + 1)}>
+              다시 시도
+            </button>
+          </div>
+        ) : (
           <div style={{ overflowX:"auto" }}>
             <table style={{ width:"100%", borderCollapse:"collapse",
                             fontFamily:"Noto Sans KR,sans-serif", fontSize:13 }}>

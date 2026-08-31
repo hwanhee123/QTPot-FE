@@ -18,6 +18,8 @@ export default function Profile() {
   const [yearCount,  setYearCount]  = useState(0);
   const [totalCount, setTotalCount] = useState(0);
   const [loading,    setLoading]    = useState(true);
+  const [loadError,  setLoadError]  = useState(false);
+  const [retryTick,  setRetryTick]  = useState(0);
 
   const [pwForm,    setPwForm]    = useState({ currentPassword:"", newPassword:"", confirm:"" });
   const [pwError,   setPwError]   = useState("");
@@ -25,6 +27,8 @@ export default function Profile() {
   const [pwLoading, setPwLoading] = useState(false);
 
   useEffect(() => {
+    setLoading(true);
+    setLoadError(false);
     Promise.all([
       getMyBadges(),
       getMyAttendanceCount(year, month),
@@ -35,8 +39,10 @@ export default function Profile() {
       setCount(c.data);
       setTotalCount(total.data);
       setYearCount(yearC.data);
+    }).catch((err) => {
+      if (err.response?.status !== 401) setLoadError(true);
     }).finally(() => setLoading(false));
-  }, []);
+  }, [retryTick]);
 
   const handlePwChange = async (e) => {
     e.preventDefault();
@@ -57,7 +63,20 @@ export default function Profile() {
   };
  
   if (loading) return <Layout><div className="loading">불러오는 중...</div></Layout>;
- 
+
+  if (loadError) return (
+    <Layout>
+      <div className="empty-state">
+        <div className="icon">⚠️</div>
+        <p>정보를 불러오지 못했습니다.</p>
+        <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }}
+          onClick={() => setRetryTick(t => t + 1)}>
+          다시 시도
+        </button>
+      </div>
+    </Layout>
+  );
+
   return (
     <Layout>
       {/* 배너 */}

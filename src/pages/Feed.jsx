@@ -15,6 +15,7 @@ export default function Feed() {
   const [date,    setDate]  = useState(today);
   const [items,   setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error,   setError] = useState(false);
 
   const isCurrentMonth = year === now.getFullYear() && month === now.getMonth() + 1;
   const firstDay = `${year}-${String(month).padStart(2,"0")}-01`;
@@ -24,11 +25,14 @@ export default function Feed() {
 
   const load = useCallback(async () => {
     setLoading(true);
+    setError(false);
     try {
       const res = date
         ? await getFeed(date)
         : await getFeed(null, year, month);
       setItems(res.data);
+    } catch (err) {
+      if (err.response?.status !== 401) setError(true);
     } finally { setLoading(false); }
   }, [date, year, month]);
 
@@ -113,6 +117,14 @@ export default function Feed() {
 
       {loading ? (
         <div className="loading">불러오는 중...</div>
+      ) : error ? (
+        <div className="empty-state">
+          <div className="icon">⚠️</div>
+          <p>피드를 불러오지 못했습니다.</p>
+          <button className="btn btn-secondary btn-sm" style={{ marginTop: 12 }} onClick={load}>
+            다시 시도
+          </button>
+        </div>
       ) : items.length === 0 ? (
         <div className="empty-state">
           <div className="icon">📖</div>
